@@ -33,8 +33,8 @@ const PlacesPage = () => {
       <AccountNav />
       <div className="text-center ">
         <Link
-          className="inline-flex gap-1 rounded-full bg-[#D746B7] py-2 px-6 text-white"
-          to={'/account/places/new'}
+          className="inline-flex gap-1 rounded-full bg-[#D746B7] px-6 py-2 text-white"
+          to={'/account/verify-identity'}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
