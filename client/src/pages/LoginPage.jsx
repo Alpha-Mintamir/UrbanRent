@@ -2,24 +2,23 @@ import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import ProfilePage from './ProfilePage';
 import { useAuth } from '../../hooks';
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [redirect, setRedirect] = useState(false);
   const auth = useAuth();
 
-  const handleFormData = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFormSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    const response = await auth.login(formData);
+    const response = await auth.login({ email, password });
     if (response.success) {
       toast.success(response.message);
       setRedirect(true);
@@ -50,22 +49,32 @@ const LoginPage = () => {
     <div className="mt-4 flex grow items-center justify-around p-4 md:p-0">
       <div className="mb-40">
         <h1 className="mb-4 text-center text-4xl">Login</h1>
-        <form className="mx-auto max-w-md" onSubmit={handleFormSubmit}>
-          <input
-            name="email"
-            type="email"
-            placeholder="your@email.com"
-            value={formData.email}
-            onChange={handleFormData}
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="password"
-            value={formData.password}
-            onChange={handleFormData}
-          />
-          <button className="primary my-4">Login</button>
+        <form onSubmit={handleLogin} className="mx-auto max-w-md">
+          <div className="flex flex-col">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="primary my-4">
+            Login
+          </Button>
         </form>
 
         <div className="mb-4 flex w-full items-center gap-4">

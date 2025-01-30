@@ -3,27 +3,35 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
 import { Navigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 import { useAuth } from '../../hooks';
 
 const RegisterPage = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [redirect, setRedirect] = useState(false);
   const auth = useAuth();
+  const [passwordValid, setPasswordValid] = useState(false);
+  const [passwordCriteria, setPasswordCriteria] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false,
+  });
 
-  const handleFormData = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleFormSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    const response = await auth.register(formData);
+    const response = await auth.register({ name, email, password });
     if (response.success) {
       toast.success(response.message);
       setRedirect(true);
@@ -42,6 +50,18 @@ const RegisterPage = () => {
     }
   };
 
+  const validatePassword = (password) => {
+    const criteria = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+    setPasswordCriteria(criteria);
+    setPasswordValid(Object.values(criteria).every(Boolean));
+  };
+
   if (redirect) {
     return <Navigate to="/" />;
   }
@@ -50,29 +70,115 @@ const RegisterPage = () => {
     <div className="mt-4 flex grow items-center justify-around p-4 md:p-0">
       <div className="mb-40">
         <h1 className="mb-4 text-center text-4xl">Register</h1>
-        <form className="mx-auto max-w-md" onSubmit={handleFormSubmit}>
-          <input
-            name="name"
-            type="text"
-            placeholder="John Doe"
-            value={formData.name}
-            onChange={handleFormData}
-          />
-          <input
-            name="email"
-            type="email"
-            placeholder="your@email.com"
-            value={formData.email}
-            onChange={handleFormData}
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="password"
-            value={formData.password}
-            onChange={handleFormData}
-          />
-          <button className="primary my-2">Register</button>
+        <form className="mx-auto max-w-md" onSubmit={handleRegister}>
+          <div className="flex flex-col">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="relative flex flex-col">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                validatePassword(e.target.value);
+              }}
+              required
+            />
+            <span
+              className="absolute right-3 top-10 cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+          <div className="relative flex flex-col">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+            <span
+              className="absolute right-3 top-10 cursor-pointer"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+          <div className="mt-2 text-sm text-gray-600">
+            <p>Password must meet the following criteria:</p>
+            <ul className="list-inside list-disc">
+              <li
+                className={
+                  passwordCriteria.length ? 'text-green-500' : 'text-red-500'
+                }
+              >
+                At least 8 characters
+              </li>
+              <li
+                className={
+                  passwordCriteria.uppercase ? 'text-green-500' : 'text-red-500'
+                }
+              >
+                At least one uppercase letter
+              </li>
+              <li
+                className={
+                  passwordCriteria.lowercase ? 'text-green-500' : 'text-red-500'
+                }
+              >
+                At least one lowercase letter
+              </li>
+              <li
+                className={
+                  passwordCriteria.number ? 'text-green-500' : 'text-red-500'
+                }
+              >
+                At least one number
+              </li>
+              <li
+                className={
+                  passwordCriteria.specialChar
+                    ? 'text-green-500'
+                    : 'text-red-500'
+                }
+              >
+                At least one special character
+              </li>
+            </ul>
+          </div>
+          <Button
+            type="submit"
+            className="primary my-2"
+            disabled={!passwordValid || password !== confirmPassword}
+          >
+            Register
+          </Button>
         </form>
 
         <div className="mb-4 flex w-full items-center gap-4">
