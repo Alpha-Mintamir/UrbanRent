@@ -9,8 +9,10 @@ import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import PlacesPage from './pages/PlacesPage';
+import BookingsPage from './pages/BookingsPage';
 import PlacesFormPage from './pages/PlacesFormPage';
 import PlacePage from './pages/PlacePage';
+import SingleBookedPlace from './pages/SingleBookedPlace';
 import axiosInstance from './utils/axios';
 import { UserProvider } from './providers/UserProvider';
 import { PlaceProvider } from './providers/PlaceProvider';
@@ -18,6 +20,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
 import IdentityVerificationPage from './pages/IdentityVerificationPage';
+import AuthGuard from '@/components/guards/AuthGuard';
 
 function App() {
   useEffect(() => {
@@ -39,7 +42,19 @@ function App() {
               <Route path="/account/places" element={<PlacesPage />} />
               <Route path="/account/places/new" element={<PlacesFormPage />} />
               <Route path="/account/places/:id" element={<PlacesFormPage />} />
-              <Route path="/place/:id" element={<PlacePage />} />
+              <Route 
+                path="/place/:id" 
+                element={
+                  <AuthGuard>
+                    <PlacePage />
+                  </AuthGuard>
+                } 
+              />
+              <Route path="/account/bookings" element={<BookingsPage />} />
+              <Route
+                path="/account/bookings/:id"
+                element={<SingleBookedPlace />}
+              />
               <Route
                 path="/account/verify-identity"
                 element={<IdentityVerificationPage />}

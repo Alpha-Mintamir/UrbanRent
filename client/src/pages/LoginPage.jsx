@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [redirect, setRedirect] = useState(false);
   const auth = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,7 +23,7 @@ const LoginPage = () => {
     const response = await auth.login({ email, password });
     if (response.success) {
       toast.success(response.message);
-      setRedirect(true);
+      handleLoginSuccess();
     } else {
       toast.error(response.message);
     }
@@ -31,10 +33,15 @@ const LoginPage = () => {
     const response = await auth.googleLogin(credential);
     if (response.success) {
       toast.success(response.message);
-      setRedirect(true);
+      handleLoginSuccess();
     } else {
       toast.error(response.message);
     }
+  };
+
+  const handleLoginSuccess = () => {
+    const from = location.state?.from || '/';
+    navigate(from);
   };
 
   if (redirect) {
