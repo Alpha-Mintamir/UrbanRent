@@ -30,6 +30,26 @@ const RegisterPage = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    
+    // Debug log
+    console.log('Form data being submitted:', { 
+      name, 
+      email, 
+      password: password ? '********' : undefined,
+      passwordValid,
+      passwordCriteria,
+      passwordsMatch: password === confirmPassword
+    });
+
+    if (!passwordValid) {
+      toast.error('Password does not meet all requirements');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
 
     const response = await auth.register({ name, email, password });
     if (response.success) {

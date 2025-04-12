@@ -26,7 +26,9 @@ export const useProvideAuth = () => {
 
     const register = async (formData) => {
         const { name, email, password } = formData;
-
+        
+        console.log('Sending registration data:', { name, email, password: password ? '********' : undefined });
+        
         try {
             const { data } = await axiosInstance.post('user/register', {
                 name,
@@ -39,9 +41,10 @@ export const useProvideAuth = () => {
                 setItemsInLocalStorage('user', data.user)
                 setItemsInLocalStorage('token', data.token)
             }
-            return { success: true, message: 'Registration successfull' }
+            return { success: true, message: 'Registration successful' }
         } catch (error) {
-            const { message } = error.response.data
+            console.error('Registration error:', error.response?.data || error.message);
+            const message = error.response?.data?.message || 'Registration failed. Please try again.';
             return { success: false, message }
         }
     }

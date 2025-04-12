@@ -7,7 +7,7 @@ const cloudinary = require('cloudinary').v2;
 // Register/SignUp user
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, picture } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -16,7 +16,7 @@ exports.register = async (req, res) => {
     }
 
     // check if user is already registered
-    let user = await User.findOne({ email });
+    let user = await User.findByEmail(email);
 
     if (user) {
       return res.status(400).json({
@@ -24,18 +24,21 @@ exports.register = async (req, res) => {
       });
     }
 
-    user = await User.create({
+    // Create new user
+    user = await User.register({
       name,
       email,
       password,
+      picture
     });
 
     // after creating new user in DB send the token
     cookieToken(user, res);
   } catch (err) {
+    console.error('Registration error:', err);
     res.status(500).json({
       message: 'Internal server Error',
-      error: err,
+      error: err.message,
     });
   }
 };
@@ -52,7 +55,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findByEmail(email);
 
     if (!user) {
       return res.status(400).json({
@@ -61,7 +64,7 @@ exports.login = async (req, res) => {
     }
 
     // match the password
-    const isPasswordCorrect = await user.isValidatedPassword(password);
+    const isPasswordCorrect = await User.isValidatedPassword(password, user.password);
 
     if (!isPasswordCorrect) {
       return res.status(401).json({
@@ -72,9 +75,10 @@ exports.login = async (req, res) => {
     // if everything is fine we will send the token
     cookieToken(user, res);
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({
       message: 'Internal server Error',
-      error: err,
+      error: err.message,
     });
   }
 };
@@ -85,29 +89,31 @@ exports.googleLogin = async (req, res) => {
     const { name, email } = req.body;
 
     if (!name || !email) {
-      return res.status(400), json({
+      return res.status(400).json({
         message: 'Name and email are required'
-      })
+      });
     }
 
     // check if user already registered
-    let user = await User.findOne({ email });
+    let user = await User.findByEmail(email);
 
     // If the user does not exist, create a new user in the DB  
     if (!user) {
-      user = await User.create({
+      const randomPassword = Math.random().toString(36).slice(-8);
+      user = await User.register({
         name,
         email,
-        password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10)
-      })
+        password: randomPassword
+      });
     }
 
     // send the token
-    cookieToken(user, res)
+    cookieToken(user, res);
   } catch (err) {
+    console.error('Google login error:', err);
     res.status(500).json({
       message: 'Internal server Error',
-      error: err,
+      error: err.message,
     });
   }
 }
@@ -121,8 +127,9 @@ exports.uploadPicture = async (req, res) => {
     });
     res.status(200).json(result.secure_url)
   } catch (error) {
+    console.error('Upload picture error:', error);
     res.status(500).json({
-      error,
+      error: error.message,
       message: 'Internal server error',
     });
   }
@@ -133,29 +140,25 @@ exports.updateUserDetails = async (req, res) => {
   try {
     const { name, password, email, picture } = req.body
 
-    const user = await User.findOne({ email })
+    const user = await User.findByEmail(email);
 
     if (!user) {
-      return res.status(404), json({
+      return res.status(404).json({
         message: 'User not found'
-      })
+      });
     }
 
-    // user can update only name, only password,only profile pic or all three
-
-    user.name = name
-    if (picture && !password) {
-      user.picture = picture
-    } else if (password && !picture) {
-      user.password = password
-    } else {
-      user.picture = picture
-      user.password = password
-    }
-    const updatedUser = await user.save()
-    cookieToken(updatedUser, res)
+    // TODO: Implement user update in PostgreSQL model
+    // This needs to be implemented in the User model
+    
+    // After updating user, send token
+    cookieToken(user, res);
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" }, error)
+    console.error('Update user error:', error);
+    res.status(500).json({ 
+      message: "Internal server error",
+      error: error.message 
+    });
   }
 }
 

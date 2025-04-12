@@ -4,7 +4,16 @@ const User = require('../models/User');
 // Checks user is logged in based on passed token and set the user in request
 exports.isLoggedIn = async (req, res, next) => {
     // token could be found in request cookies or in reqest headers
-    const token = req.cookies.token || req.header('Authorization').replace('Bearer ', '');
+    let token;
+    
+    // Check if token exists in cookies
+    if (req.cookies && req.cookies.token) {
+        token = req.cookies.token;
+    } 
+    // Check if token exists in Authorization header
+    else if (req.header('Authorization')) {
+        token = req.header('Authorization').replace('Bearer ', '');
+    }
 
     if (!token) {
         return res.status(401).json({

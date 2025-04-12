@@ -1,15 +1,15 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connectWithDB = require("./config/db");
+const connectWithDB = require("./config/db"); // Still using this to connect DB
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary").v2;
 
-// connect with database
-connectWithDB();
+// Connect with PostgreSQL Database
+require("./config/db");  // This will automatically connect to DB
 
-// cloudinary configuration
+// Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -33,7 +33,7 @@ app.use(
   })
 );
 
-// middleware to handle json
+// Middleware to handle JSON requests
 app.use(express.json());
 
 // CORS
@@ -44,7 +44,7 @@ app.use(
   })
 );
 
-// use express router
+// Use express router
 app.use("/", require("./routes"));
 
 app.listen(process.env.PORT || 8000, (err) => {
