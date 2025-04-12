@@ -21,6 +21,7 @@ import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
 import IdentityVerificationPage from './pages/IdentityVerificationPage';
 import AuthGuard from '@/components/guards/AuthGuard';
+import Home from './pages/Home';
 
 function App() {
   useEffect(() => {
@@ -35,7 +36,8 @@ function App() {
         <PlaceProvider>
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route index element={<IndexPage />} />
+              <Route index element={<Home />} />
+              <Route path="/index" element={<IndexPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/account" element={<ProfilePage />} />

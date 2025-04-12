@@ -91,10 +91,12 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="mt-4 flex grow items-center justify-around p-4 md:p-0">
-      <div className="mb-40">
-        <h1 className="mb-4 text-center text-4xl">Register</h1>
-        <form className="mx-auto max-w-md" onSubmit={handleRegister}>
+    <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 mt-24">
+        <div>
+          <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Register your account</h1>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleRegister}>
           <div className="flex flex-col">
             <Label htmlFor="name">Name</Label>
             <Input

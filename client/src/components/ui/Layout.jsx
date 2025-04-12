@@ -1,19 +1,17 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { Header } from './Header';
-import Footer from './Footer';
-import Home from '@/pages/Home';
 
 const Layout = () => {
+  const location = useLocation();
+  
   return (
     <>
       <Header />
-      <div className="mx-auto flex min-h-screen max-w-screen-xl flex-col">
-        <Home />
+      <div className="mx-auto flex min-h-screen max-w-screen-xl flex-col pt-20">
         <Outlet />
       </div>
-      <Footer />
     </>
   );
 };
