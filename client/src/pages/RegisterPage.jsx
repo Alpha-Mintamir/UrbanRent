@@ -15,6 +15,8 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('1'); // Default to tenant (1)
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [redirect, setRedirect] = useState(false);
@@ -36,6 +38,8 @@ const RegisterPage = () => {
       name, 
       email, 
       password: password ? '********' : undefined,
+      phone,
+      role,
       passwordValid,
       passwordCriteria,
       passwordsMatch: password === confirmPassword
@@ -51,7 +55,7 @@ const RegisterPage = () => {
       return;
     }
 
-    const response = await auth.register({ name, email, password });
+    const response = await auth.register({ name, email, password, phone, role: parseInt(role) });
     if (response.success) {
       toast.success(response.message);
       setRedirect(true);
@@ -112,6 +116,29 @@ const RegisterPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+          </div>
+          <div className="flex flex-col">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              type="tel"
+              placeholder="123-456-7890"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col mb-4">
+            <Label className="mb-2">Role</Label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="rounded-md border border-gray-300 p-2"
+            >
+              <option value="1">Tenant</option>
+              <option value="2">Property Owner</option>
+              <option value="3">Broker</option>
+            </select>
           </div>
           <div className="relative flex flex-col">
             <Label htmlFor="password">Password</Label>

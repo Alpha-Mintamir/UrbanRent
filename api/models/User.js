@@ -9,15 +9,16 @@ const DEFAULT_PICTURE_URL =
 
 const User = {
   // Register new user
-  async register({ name, email, password, picture }) {
+  async register({ name, email, password, picture, phone, role }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     picture = picture || DEFAULT_PICTURE_URL;
+    role = role || 1; // Default to tenant (1) if not specified
 
     const result = await pool.query(
-      `INSERT INTO users (name, email, password, picture)
-       VALUES ($1, $2, $3, $4)
-       RETURNING user_id, name, email, picture`,
-      [name, email, hashedPassword, picture]
+      `INSERT INTO users (name, email, password, picture, phone, role)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING user_id, name, email, picture, phone, role`,
+      [name, email, hashedPassword, picture, phone, role]
     );
 
     return result.rows[0];

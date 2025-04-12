@@ -25,15 +25,23 @@ export const useProvideAuth = () => {
     }, [])
 
     const register = async (formData) => {
-        const { name, email, password } = formData;
+        const { name, email, password, phone, role } = formData;
         
-        console.log('Sending registration data:', { name, email, password: password ? '********' : undefined });
+        console.log('Sending registration data:', { 
+            name, 
+            email, 
+            password: password ? '********' : undefined,
+            phone,
+            role
+        });
         
         try {
             const { data } = await axiosInstance.post('user/register', {
                 name,
                 email,
                 password,
+                phone,
+                role
             });
             if (data.user && data.token) {
                 setUser(data.user)
@@ -50,12 +58,13 @@ export const useProvideAuth = () => {
     }
 
     const login = async (formData) => {
-        const { email, password } = formData;
+        const { email, password, role } = formData;
 
         try {
             const { data } = await axiosInstance.post('user/login', {
                 email,
                 password,
+                role
             });
             if (data.user && data.token) {
                 setUser(data.user)
@@ -63,19 +72,21 @@ export const useProvideAuth = () => {
                 setItemsInLocalStorage('user', data.user)
                 setItemsInLocalStorage('token', data.token)
             }
-            return { success: true, message: 'Login successfull' }
+            return { success: true, message: 'Login successful' }
         } catch (error) {
-            const { message } = error.response.data
+            console.error('Login error:', error.response?.data || error.message);
+            const message = error.response?.data?.message || 'Login failed. Please try again.';
             return { success: false, message }
         }
     }
 
-    const googleLogin = async (credential) => {
+    const googleLogin = async (credential, role) => {
         const decoded = jwt_decode(credential);
         try {
             const { data } = await axiosInstance.post('user/google/login', {
                 name: `${decoded.given_name} ${decoded.family_name}`,
                 email: decoded.email,
+                role
             });
             if (data.user && data.token) {
                 setUser(data.user)
@@ -83,9 +94,11 @@ export const useProvideAuth = () => {
                 setItemsInLocalStorage('user', data.user)
                 setItemsInLocalStorage('token', data.token)
             }
-            return { success: true, message: 'Login successfull' }
+            return { success: true, message: 'Login successful' }
         } catch (error) {
-            return { success: false, message: error.message }
+            console.error('Google login error:', error.response?.data || error.message);
+            const message = error.response?.data?.message || 'Login failed. Please try again.';
+            return { success: false, message }
         }
     }
 
@@ -99,7 +112,7 @@ export const useProvideAuth = () => {
                 removeItemFromLocalStorage('user');
                 removeItemFromLocalStorage('token');
             }
-            return { success: true, message: 'Logout successfull' }
+            return { success: true, message: 'Logout successful' }
         } catch (error) {
             console.log(error)
             return { success: false, message: 'Something went wrong!' }

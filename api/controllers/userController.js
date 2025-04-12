@@ -7,7 +7,7 @@ const cloudinary = require('cloudinary').v2;
 // Register/SignUp user
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, picture } = req.body;
+    const { name, email, password, picture, phone, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -29,7 +29,9 @@ exports.register = async (req, res) => {
       name,
       email,
       password,
-      picture
+      picture,
+      phone,
+      role
     });
 
     // after creating new user in DB send the token
@@ -46,12 +48,12 @@ exports.register = async (req, res) => {
 // Login/SignIn user
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
-    // check for presence of email and password
-    if (!email || !password) {
+    // check for presence of email, password and role
+    if (!email || !password || !role) {
       return res.status(400).json({
-        message: 'Email and password are required!',
+        message: 'Email, password and role are required!',
       });
     }
 
@@ -72,6 +74,13 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check if the user has the requested role - strict check
+    if (parseInt(user.role) !== parseInt(role)) {
+      return res.status(403).json({
+        message: 'Invalid role for this account. Please select the correct role.',
+      });
+    }
+
     // if everything is fine we will send the token
     cookieToken(user, res);
   } catch (err) {
@@ -86,11 +95,11 @@ exports.login = async (req, res) => {
 // Google Login
 exports.googleLogin = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, role } = req.body;
 
-    if (!name || !email) {
+    if (!name || !email || !role) {
       return res.status(400).json({
-        message: 'Name and email are required'
+        message: 'Name, email and role are required'
       });
     }
 
@@ -103,8 +112,16 @@ exports.googleLogin = async (req, res) => {
       user = await User.register({
         name,
         email,
-        password: randomPassword
+        password: randomPassword,
+        role: parseInt(role)
       });
+    } else {
+      // Strict role check for existing users
+      if (parseInt(user.role) !== parseInt(role)) {
+        return res.status(403).json({
+          message: 'Invalid role for this account. Please select the correct role.',
+        });
+      }
     }
 
     // send the token

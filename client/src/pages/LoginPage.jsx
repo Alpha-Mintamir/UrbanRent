@@ -12,6 +12,7 @@ import { useAuth } from '../../hooks';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState('1'); // Default to tenant (1)
   const [redirect, setRedirect] = useState(false);
   const auth = useAuth();
   const location = useLocation();
@@ -20,7 +21,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const response = await auth.login({ email, password });
+    const response = await auth.login({ email, password, role: parseInt(role) });
     if (response.success) {
       toast.success(response.message);
       handleLoginSuccess();
@@ -30,7 +31,7 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = async (credential) => {
-    const response = await auth.googleLogin(credential);
+    const response = await auth.googleLogin(credential, parseInt(role));
     if (response.success) {
       toast.success(response.message);
       handleLoginSuccess();
@@ -78,6 +79,20 @@ const LoginPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+          </div>
+          <div className="flex flex-col mb-4">
+            <Label className="mb-2" htmlFor="role">Login as</Label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="rounded-md border border-gray-300 p-2"
+            >
+              <option value="1">Tenant</option>
+              <option value="2">Property Owner</option>
+              <option value="3">Broker</option>
+              <option value="4">Admin</option>
+            </select>
           </div>
           <Button type="submit" className="primary my-4">
             Login
