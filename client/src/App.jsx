@@ -13,6 +13,9 @@ import BookingsPage from './pages/BookingsPage';
 import PlacesFormPage from './pages/PlacesFormPage';
 import PlacePage from './pages/PlacePage';
 import SingleBookedPlace from './pages/SingleBookedPlace';
+import PropertyOwnerDashboard from './pages/PropertyOwnerDashboard';
+import ReviewsPage from './pages/ReviewsPage';
+import MessagesPage from './pages/MessagesPage';
 import axiosInstance from './utils/axios';
 import { UserProvider } from './providers/UserProvider';
 import { PlaceProvider } from './providers/PlaceProvider';
@@ -21,6 +24,7 @@ import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
 import IdentityVerificationPage from './pages/IdentityVerificationPage';
 import AuthGuard from '@/components/guards/AuthGuard';
+import RoleGuard from '@/components/guards/RoleGuard';
 import Home from './pages/Home';
 
 function App() {
@@ -41,6 +45,37 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/account" element={<ProfilePage />} />
+              
+              {/* Property Owner Dashboard */}
+              <Route 
+                path="/owner/dashboard" 
+                element={
+                  <RoleGuard requiredRole={2}>
+                    <PropertyOwnerDashboard />
+                  </RoleGuard>
+                } 
+              />
+              
+              {/* Property Owner Reviews */}
+              <Route 
+                path="/account/reviews" 
+                element={
+                  <RoleGuard requiredRole={2}>
+                    <ReviewsPage />
+                  </RoleGuard>
+                } 
+              />
+              
+              {/* Property Owner Messages */}
+              <Route 
+                path="/account/messages" 
+                element={
+                  <RoleGuard requiredRole={2}>
+                    <MessagesPage />
+                  </RoleGuard>
+                } 
+              />
+              
               <Route path="/account/places" element={<PlacesPage />} />
               <Route path="/account/places/new" element={<PlacesFormPage />} />
               <Route path="/account/places/:id" element={<PlacesFormPage />} />

@@ -66,7 +66,7 @@ exports.login = async (req, res) => {
     }
 
     // match the password
-    const isPasswordCorrect = await User.isValidatedPassword(password, user.password);
+    const isPasswordCorrect = await user.isValidatedPassword(password);
 
     if (!isPasswordCorrect) {
       return res.status(401).json({

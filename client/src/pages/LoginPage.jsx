@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
@@ -41,16 +41,53 @@ const LoginPage = () => {
   };
 
   const handleLoginSuccess = () => {
-    const from = location.state?.from || '/';
-    navigate(from);
+    // Get the user's role from auth context
+    const userRole = parseInt(auth.user?.role);
+    console.log("User role:", userRole);
+    
+    // If there's a specific page the user was trying to access, go there
+    if (location.state?.from) {
+      navigate(location.state.from);
+      return;
+    }
+    
+    // Otherwise, redirect based on role
+    if (userRole === 2) {
+      // Property Owner
+      navigate('/owner/dashboard');
+    } else if (userRole === 3) {
+      // Broker
+      navigate('/broker/dashboard');
+    } else if (userRole === 4) {
+      // Admin
+      navigate('/admin/dashboard');
+    } else {
+      // Default (Tenant or unknown role)
+      navigate('/');
+    }
   };
+
+  // Check if user is already logged in and redirect based on role
+  useEffect(() => {
+    if (auth.user) {
+      const userRole = parseInt(auth.user.role);
+      if (userRole === 2) {
+        navigate('/owner/dashboard');
+      } else if (userRole === 3) {
+        navigate('/broker/dashboard');
+      } else if (userRole === 4) {
+        navigate('/admin/dashboard');
+      }
+    }
+  }, [auth.user, navigate]);
 
   if (redirect) {
     return <Navigate to={'/'} />;
   }
 
-  if (auth.user) {
-    return <ProfilePage />;
+  // Don't render ProfilePage, let the useEffect handle redirection
+  if (auth.loading) {
+    return <div>Loading...</div>;
   }
 
   return (

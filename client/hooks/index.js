@@ -19,7 +19,12 @@ export const useProvideAuth = () => {
     useEffect(() => {
         const storedUser = getItemFromLocalStorage('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            // Ensure role is stored as a number
+            if (parsedUser.role) {
+                parsedUser.role = parseInt(parsedUser.role);
+            }
+            setUser(parsedUser);
         }
         setLoading(false)
     }, [])
@@ -64,9 +69,13 @@ export const useProvideAuth = () => {
             const { data } = await axiosInstance.post('user/login', {
                 email,
                 password,
-                role
+                role: parseInt(role)
             });
             if (data.user && data.token) {
+                // Ensure role is stored as a number
+                if (data.user.role) {
+                    data.user.role = parseInt(data.user.role);
+                }
                 setUser(data.user)
                 // save user and token in local storage
                 setItemsInLocalStorage('user', data.user)
@@ -86,9 +95,13 @@ export const useProvideAuth = () => {
             const { data } = await axiosInstance.post('user/google/login', {
                 name: `${decoded.given_name} ${decoded.family_name}`,
                 email: decoded.email,
-                role
+                role: parseInt(role)
             });
             if (data.user && data.token) {
+                // Ensure role is stored as a number
+                if (data.user.role) {
+                    data.user.role = parseInt(data.user.role);
+                }
                 setUser(data.user)
                 // save user and token in local storage
                 setItemsInLocalStorage('user', data.user)

@@ -1,6 +1,52 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axiosInstance from '@/utils/axios';
+
+// Comprehensive fallback data for locations in Addis Ababa
+const FALLBACK_SUB_CITIES = [
+  'አዲስ ከተማ',
+  'አቃቂ ቃሊቲ',
+  'አራዳ',
+  'ቦሌ',
+  'ጉለሌ',
+  'ኮልፌ ቀራኒዮ',
+  'ልደታ',
+  'ንፋስ ስልክ ላፍቶ',
+  'ቂርቆስ',
+  'የካ'
+];
+
+const FALLBACK_WOREDAS = {
+  'አዲስ ከተማ': Array.from({ length: 14 }, (_, i) => `ወረዳ ${i + 1}`),
+  'አቃቂ ቃሊቲ': Array.from({ length: 13 }, (_, i) => `ወረዳ ${i + 1}`),
+  'አራዳ': Array.from({ length: 10 }, (_, i) => `ወረዳ ${i + 1}`),
+  'ቦሌ': Array.from({ length: 14 }, (_, i) => `ወረዳ ${i + 1}`),
+  'ጉለሌ': Array.from({ length: 10 }, (_, i) => `ወረዳ ${i + 1}`),
+  'ኮልፌ ቀራኒዮ': Array.from({ length: 15 }, (_, i) => `ወረዳ ${i + 1}`),
+  'ልደታ': Array.from({ length: 10 }, (_, i) => `ወረዳ ${i + 1}`),
+  'ንፋስ ስልክ ላፍቶ': Array.from({ length: 13 }, (_, i) => `ወረዳ ${i + 1}`),
+  'ቂርቆስ': Array.from({ length: 11 }, (_, i) => `ወረዳ ${i + 1}`),
+  'የካ': Array.from({ length: 13 }, (_, i) => `ወረዳ ${i + 1}`)
+};
+
+// Create a comprehensive kebele list for each woreda in each sub-city
+const FALLBACK_KEBELES = {};
+Object.keys(FALLBACK_WOREDAS).forEach(subCity => {
+  FALLBACK_KEBELES[subCity] = {};
+  FALLBACK_WOREDAS[subCity].forEach(woreda => {
+    // Different sub-cities have different kebele numbering patterns
+    let kebeleCount = 20;
+    if (subCity === 'አዲስ ከተማ' || subCity === 'ቦሌ' || subCity === 'ኮልፌ ቀራኒዮ') {
+      kebeleCount = 24;
+    } else if (subCity === 'አራዳ' || subCity === 'ጉለሌ' || subCity === 'ልደታ') {
+      kebeleCount = 18;
+    } else if (subCity === 'ቂርቆስ') {
+      kebeleCount = 15;
+    }
+    FALLBACK_KEBELES[subCity][woreda] = Array.from({ length: kebeleCount }, (_, i) => `ቀበሌ ${i + 1}`);
+  });
+});
 
 const IdentityVerificationPage = () => {
   const navigate = useNavigate();
@@ -13,15 +59,118 @@ const IdentityVerificationPage = () => {
     wereda: '',
     kebele: '',
     houseNumber: '',
+    areaName: '',
     nationalId: null,
     livePhoto: null,
   });
   const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // State for dropdown options
+  const [subCities, setSubCities] = useState(FALLBACK_SUB_CITIES);
+  const [woredas, setWoredas] = useState([]);
+  const [kebeles, setKebeles] = useState([]);
 
-  // Dummy data for dropdowns
-  const kifleKetemaOptions = ['አዲስ ከተማ', 'ቂርቆስ', 'ቦሌ', 'የካ', 'አራዳ', 'ልደታ'];
-  const weredaOptions = Array.from({ length: 14 }, (_, i) => `ወረዳ ${i + 1}`);
-  const kebeleOptions = Array.from({ length: 20 }, (_, i) => `ቀበሌ ${i + 1}`);
+  // Fetch sub-cities on component mount
+  useEffect(() => {
+    const fetchSubCities = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axiosInstance.get('/locations/sub-cities');
+        console.log('Sub-cities response:', response.data);
+        if (response.data && response.data.success) {
+          // Make sure we're using the correct property from the API response
+          const subCitiesData = response.data.subCities || [];
+          if (subCitiesData.length > 0) {
+            setSubCities(subCitiesData);
+          } else {
+            setSubCities(FALLBACK_SUB_CITIES);
+          }
+        } else {
+          setSubCities(FALLBACK_SUB_CITIES);
+        }
+      } catch (error) {
+        console.error('Error fetching sub-cities:', error);
+        // Use fallback data
+        setSubCities(FALLBACK_SUB_CITIES);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Attempt to fetch from API, but we already have fallback data loaded
+    fetchSubCities();
+  }, []);
+
+  // Update woredas when sub-city changes
+  useEffect(() => {
+    if (!verificationData.kifleKetema) {
+      setWoredas([]);
+      return;
+    }
+    
+    // Immediately set fallback data for better UX
+    setWoredas(FALLBACK_WOREDAS[verificationData.kifleKetema] || []);
+    
+    const fetchWoredas = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axiosInstance.get(`/locations/sub-city/${encodeURIComponent(verificationData.kifleKetema)}/woredas`);
+        console.log('Woredas response:', response.data);
+        if (response.data && response.data.success) {
+          // Make sure we're using the correct property from the API response
+          const woredasData = response.data.woredas || [];
+          if (woredasData.length > 0) {
+            setWoredas(woredasData);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching woredas:', error);
+        // Fallback data already set above
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchWoredas();
+  }, [verificationData.kifleKetema]);
+
+  // Update kebeles when woreda changes
+  useEffect(() => {
+    if (!verificationData.kifleKetema || !verificationData.wereda) {
+      setKebeles([]);
+      return;
+    }
+    
+    // Immediately set fallback data for better UX
+    setKebeles(
+      FALLBACK_KEBELES[verificationData.kifleKetema]?.[verificationData.wereda] || []
+    );
+    
+    const fetchKebeles = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axiosInstance.get(
+          `/locations/sub-city/${encodeURIComponent(verificationData.kifleKetema)}/woreda/${encodeURIComponent(verificationData.wereda)}/kebeles`
+        );
+        console.log('Kebeles response:', response.data);
+        if (response.data && response.data.success) {
+          // Make sure we're using the correct property from the API response
+          const kebelesData = response.data.kebeles || [];
+          if (kebelesData.length > 0) {
+            setKebeles(kebelesData);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching kebeles:', error);
+        // Fallback data already set above
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchKebeles();
+  }, [verificationData.kifleKetema, verificationData.wereda]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -104,21 +253,60 @@ const IdentityVerificationPage = () => {
   };
 
   const handleNextStep = () => {
-    if (
-      step === 1 &&
-      (!verificationData.kifleKetema ||
-        !verificationData.wereda ||
-        !verificationData.kebele ||
-        !verificationData.houseNumber)
-    ) {
-      toast.error('እባክዎ ሁሉንም መረጃ ያስገቡ');
-      return;
+    if (step === 1) {
+      if (!verificationData.kifleKetema) {
+        toast.error('እባክዎ ክፍለ ከተማ ይምረጡ');
+        return;
+      }
+      if (!verificationData.wereda) {
+        toast.error('እባክዎ ወረዳ ይምረጡ');
+        return;
+      }
+      if (!verificationData.kebele) {
+        toast.error('እባክዎ ቀበሌ ይምረጡ');
+        return;
+      }
+      if (!verificationData.houseNumber) {
+        toast.error('እባክዎ የቤት ቁጥር ያስገቡ');
+        return;
+      }
+      if (!verificationData.areaName) {
+        toast.error('እባክዎ የአካባቢ ስም ያስገቡ');
+        return;
+      }
     }
     setStep((prev) => prev + 1);
   };
 
   const handlePrevStep = () => {
     setStep((prev) => prev - 1);
+  };
+
+  const submitLocationData = async () => {
+    try {
+      setIsLoading(true);
+      const locationData = {
+        sub_city: verificationData.kifleKetema,
+        woreda: verificationData.wereda,
+        kebele: verificationData.kebele,
+        house_no: verificationData.houseNumber,
+        area_name: verificationData.areaName
+      };
+      
+      const { data } = await axiosInstance.post('/locations', locationData);
+      
+      if (data.success) {
+        toast.success('የአካባቢ መረጃ በተሳካ ሁኔታ ተልኳል!');
+        navigate('/account/places/new');
+      } else {
+        toast.error('የአካባቢ መረጃ መላክ አልተቻለም');
+      }
+    } catch (error) {
+      console.error('Error submitting location data:', error);
+      toast.error('የአካባቢ መረጃ መላክ አልተቻለም');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderStep = () => {
@@ -132,51 +320,51 @@ const IdentityVerificationPage = () => {
                 name="kifleKetema"
                 value={verificationData.kifleKetema}
                 onChange={handleInputChange}
-                className="my-1 w-full rounded-2xl border px-3 py-2"
+                className="w-full rounded-md border border-gray-300 p-2"
+                disabled={isLoading}
               >
                 <option value="">ይምረጡ</option>
-                {kifleKetemaOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {subCities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
                   </option>
                 ))}
               </select>
             </div>
-
-            <div className="col-span-1">
+            <div className="col-span-2">
               <label className="mb-2 block">ወረዳ:</label>
               <select
                 name="wereda"
                 value={verificationData.wereda}
                 onChange={handleInputChange}
-                className="my-1 w-full rounded-2xl border px-3 py-2"
+                className="w-full rounded-md border border-gray-300 p-2"
+                disabled={!verificationData.kifleKetema || isLoading}
               >
                 <option value="">ይምረጡ</option>
-                {weredaOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {woredas.map((woreda) => (
+                  <option key={woreda} value={woreda}>
+                    {woreda}
                   </option>
                 ))}
               </select>
             </div>
-
-            <div className="col-span-1">
+            <div className="col-span-2">
               <label className="mb-2 block">ቀበሌ:</label>
               <select
                 name="kebele"
                 value={verificationData.kebele}
                 onChange={handleInputChange}
-                className="my-1 w-full rounded-2xl border px-3 py-2"
+                className="w-full rounded-md border border-gray-300 p-2"
+                disabled={!verificationData.wereda || isLoading}
               >
                 <option value="">ይምረጡ</option>
-                {kebeleOptions.map((option) => (
-                  <option key={option} value={option}>
-                    {option}
+                {kebeles.map((kebele) => (
+                  <option key={kebele} value={kebele}>
+                    {kebele}
                   </option>
                 ))}
               </select>
             </div>
-
             <div className="col-span-2">
               <label className="mb-2 block">የቤት ቁጥር:</label>
               <input
@@ -185,7 +373,18 @@ const IdentityVerificationPage = () => {
                 value={verificationData.houseNumber}
                 onChange={handleInputChange}
                 placeholder="የቤት ቁጥር ያስገቡ"
-                className="my-1 w-full rounded-2xl border px-3 py-2"
+                className="w-full rounded-md border border-gray-300 p-2"
+              />
+            </div>
+            <div className="col-span-2">
+              <label className="mb-2 block">የአካባቢ ስም:</label>
+              <input
+                type="text"
+                name="areaName"
+                value={verificationData.areaName}
+                onChange={handleInputChange}
+                placeholder="የአካባቢ ስም ያስገቡ"
+                className="w-full rounded-md border border-gray-300 p-2"
               />
             </div>
           </div>
@@ -194,86 +393,66 @@ const IdentityVerificationPage = () => {
       case 2:
         return (
           <div className="flex flex-col items-center">
-            <h3 className="mb-4 text-xl">የመታወቂያ ካርድ ፎቶ</h3>
-            <div className="mb-4 w-full max-w-md rounded-lg border-2 border-dashed border-gray-300 p-8">
-              <div className="text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <input
-                  type="file"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
+            <h3 className="mb-4 text-xl">መታወቂያ ፎቶ</h3>
+            <div className="mb-4 w-full">
+              <label className="mb-2 block">መታወቂያ ፎቶ ይስቀሉ:</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
                       setVerificationData((prev) => ({
                         ...prev,
-                        nationalId: file,
+                        nationalId: reader.result,
                       }));
-                      handleNextStep();
-                    }
-                  }}
-                  accept="image/*"
-                  className="hidden"
-                  id="id-upload"
-                />
-                <label htmlFor="id-upload" className="cursor-pointer">
-                  <span className="mt-2 block text-sm font-medium text-gray-900">
-                    መታወቂያ ካርድዎን ያስገቡ
-                  </span>
-                </label>
-              </div>
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+                className="w-full rounded-md border border-gray-300 p-2"
+              />
             </div>
+            {verificationData.nationalId && (
+              <div className="mb-4">
+                <img
+                  src={verificationData.nationalId}
+                  alt="National ID"
+                  className="h-48 w-auto rounded-md object-cover"
+                />
+              </div>
+            )}
           </div>
         );
 
       case 3:
         return (
           <div className="flex flex-col items-center">
-            <h3 className="mb-4 text-xl">የእርስዎ ፎቶ</h3>
-            <div className="relative w-full max-w-md">
+            <h3 className="mb-4 text-xl">የፊት ፎቶ</h3>
+            <div className="mb-4 w-full">
               {isCameraOpen ? (
                 <div className="relative">
                   <video
                     ref={videoRef}
+                    className="h-[480px] w-[640px] rounded-md"
                     autoPlay
                     playsInline
                     muted
-                    className="mirror w-full rounded-lg"
-                    style={{
-                      maxHeight: '480px',
-                      transform: 'scaleX(-1)', // Mirror the video
-                    }}
                   />
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
-                    <button
-                      onClick={() => stopCamera()}
-                      className="rounded-full bg-gray-500 px-4 py-2 text-white"
-                    >
-                      ካሜራ ዝጋ
-                    </button>
-                    <button
-                      onClick={takeLivePhoto}
-                      className="rounded-full bg-[#D746B7] px-4 py-2 text-white"
-                    >
-                      ፎቶ ያንሱ
-                    </button>
-                  </div>
+                  <button
+                    onClick={takeLivePhoto}
+                    className="absolute bottom-4 left-1/2 -translate-x-1/2 transform rounded-full bg-[#D746B7] px-6 py-2 text-white"
+                  >
+                    ፎቶ ያንሱ
+                  </button>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-gray-300 p-8">
+                <div className="flex flex-col items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-12 w-12 text-gray-400"
+                    className="mb-4 h-24 w-24 text-gray-400"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -317,20 +496,49 @@ const IdentityVerificationPage = () => {
           <div className="flex flex-col items-center">
             <h3 className="mb-4 text-xl">ማረጋገጫ</h3>
             <p className="mb-4 text-center">ሁሉም መረጃዎች በትክክል መሞላታቸውን ያረጋግጡ</p>
+            
+            <div className="mb-6 w-full rounded-lg bg-gray-50 p-4">
+              <h4 className="mb-2 font-semibold">የአካባቢ መረጃ:</h4>
+              <p><span className="font-medium">ክፍለ ከተማ:</span> {verificationData.kifleKetema}</p>
+              <p><span className="font-medium">ወረዳ:</span> {verificationData.wereda}</p>
+              <p><span className="font-medium">ቀበሌ:</span> {verificationData.kebele}</p>
+              <p><span className="font-medium">የቤት ቁጥር:</span> {verificationData.houseNumber}</p>
+              <p><span className="font-medium">የአካባቢ ስም:</span> {verificationData.areaName}</p>
+            </div>
+            
+            <div className="mb-6 flex w-full gap-4">
+              <div className="w-1/2">
+                <h4 className="mb-2 font-semibold">መታወቂያ ፎቶ:</h4>
+                {verificationData.nationalId ? (
+                  <img 
+                    src={verificationData.nationalId} 
+                    alt="National ID" 
+                    className="h-40 w-full rounded-md object-cover"
+                  />
+                ) : (
+                  <p className="text-red-500">መታወቂያ ፎቶ አልተሰቀለም</p>
+                )}
+              </div>
+              <div className="w-1/2">
+                <h4 className="mb-2 font-semibold">የፊት ፎቶ:</h4>
+                {verificationData.livePhoto ? (
+                  <img 
+                    src={verificationData.livePhoto} 
+                    alt="Live Photo" 
+                    className="h-40 w-full rounded-md object-cover"
+                  />
+                ) : (
+                  <p className="text-red-500">የፊት ፎቶ አልተነሳም</p>
+                )}
+              </div>
+            </div>
+            
             <button
-              onClick={async () => {
-                try {
-                  // Add your verification API call here
-                  await new Promise((resolve) => setTimeout(resolve, 1500));
-                  toast.success('መረጃዎ በተሳካ ሁኔታ ተልኳል!');
-                  navigate('/account/places/new');
-                } catch (error) {
-                  toast.error('የተሳሳተ መረጃ');
-                }
-              }}
-              className="rounded-full bg-[#D746B7] px-6 py-3 text-white"
+              onClick={submitLocationData}
+              disabled={isLoading}
+              className="rounded-full bg-[#D746B7] px-6 py-3 text-white disabled:bg-gray-400"
             >
-              አረጋግጥ እና ቀጥል
+              {isLoading ? 'እየተላከ ነው...' : 'አረጋግጥ እና ቀጥል'}
             </button>
           </div>
         );
@@ -361,43 +569,26 @@ const IdentityVerificationPage = () => {
 
         {renderStep()}
 
-        {/* Navigation Buttons - Modified to show Next at every stage */}
+        {/* Navigation Buttons */}
         <div className="mt-6 flex justify-between">
           {step > 1 && (
             <button
               onClick={handlePrevStep}
               className="rounded-full bg-gray-500 px-6 py-2 text-white"
+              disabled={isLoading}
             >
               ተመለስ
             </button>
           )}
 
-          {/* Show Next button at every stage */}
+          {/* Show Next button for steps 1-3 */}
           {step < 4 && (
             <button
               onClick={handleNextStep}
               className="ml-auto rounded-full bg-[#D746B7] px-6 py-2 text-white"
+              disabled={isLoading}
             >
               ቀጥል
-            </button>
-          )}
-
-          {/* Final confirmation button */}
-          {step === 4 && (
-            <button
-              onClick={async () => {
-                try {
-                  // Simulating API call
-                  await new Promise((resolve) => setTimeout(resolve, 1500));
-                  toast.success('መረጃዎ በተሳካ ሁኔታ ተልኳል!');
-                  navigate('/account/places/new');
-                } catch (error) {
-                  toast.error('የተሳሳተ መረጃ');
-                }
-              }}
-              className="ml-auto rounded-full bg-[#D746B7] px-6 py-2 text-white"
-            >
-              አረጋግጥ እና ቀጥል
             </button>
           )}
         </div>

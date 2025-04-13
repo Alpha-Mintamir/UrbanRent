@@ -1,10 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { FaSearch } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import propertyImage from "@/assets/property-2.jpg";
+import { useAuth } from "../../hooks";
 
 const Home = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect property owners to their dashboard
+  useEffect(() => {
+    if (user) {
+      const userRole = parseInt(user.role);
+      console.log("Home - User Role:", userRole, typeof userRole);
+      
+      if (userRole === 2) {
+        console.log("Redirecting property owner to dashboard");
+        navigate('/owner/dashboard');
+      }
+    }
+  }, [user, navigate]);
+
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Hero Section with Background Image */}

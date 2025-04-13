@@ -1,7 +1,7 @@
 const User = require('../models/User');
 
 const cookieToken = (user, res) => {
-    const token = User.getJwtToken(user.user_id);
+    const token = user.getJwtToken();
 
     const options = {
         expires: new Date(

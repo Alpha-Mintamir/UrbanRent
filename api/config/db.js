@@ -1,19 +1,24 @@
 // config/db.js
-const { Pool } = require('pg');
+const { Sequelize } = require('sequelize');
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Your Neon DB URL
-  ssl: {
-    rejectUnauthorized: false,
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
   },
+  logging: false
 });
 
-pool.connect()
-  .then(() => console.log('PostgreSQL DB connected successfully'))
+// Test the connection
+sequelize.authenticate()
+  .then(() => console.log('PostgreSQL DB connected successfully via Sequelize'))
   .catch((err) => {
     console.error('DB connection failed');
     console.error(err);
     process.exit(1);
   });
 
-module.exports = pool;
+module.exports = sequelize;

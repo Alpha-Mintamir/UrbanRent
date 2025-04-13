@@ -9,6 +9,9 @@ const cloudinary = require("cloudinary").v2;
 // Connect with PostgreSQL Database
 require("./config/db");  // This will automatically connect to DB
 
+// Import models to ensure they're initialized
+require("./models/index");
+
 // Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,

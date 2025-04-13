@@ -1,5 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/database');
+const sequelize = require('../config/db');
 const PropertyOwner = require('./PropertyOwner');
 const Location = require('./Location');
 
