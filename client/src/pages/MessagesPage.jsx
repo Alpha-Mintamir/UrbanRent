@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '@/utils/axios';
 import AccountNav from '@/components/ui/AccountNav';
 import Spinner from '@/components/ui/Spinner';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const MessagesPage = () => {
+  const { language, t } = useLanguage();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -81,7 +83,7 @@ const MessagesPage = () => {
     <div className="px-4 pt-20">
       <AccountNav />
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">መልዕክቶች</h1>
+        <h1 className="text-3xl font-bold mb-6">{t('messages')}</h1>
 
         {conversations.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
@@ -99,9 +101,9 @@ const MessagesPage = () => {
                 d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
               />
             </svg>
-            <h2 className="text-2xl font-semibold mb-2">ምንም መልዕክቶች የሉም</h2>
+            <h2 className="text-2xl font-semibold mb-2">{t('noMessages')}</h2>
             <p className="text-gray-600 mb-6">
-              እስካሁን ምንም የመልዕክት ልውውጦች የሉም። ደንበኞች ስለ ንብረትዎ ሲጠይቁ እዚህ ይታያሉ።
+              {t('noMessagesDescription')}
             </p>
           </div>
         ) : (
@@ -109,7 +111,7 @@ const MessagesPage = () => {
             {/* Conversations List */}
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <div className="p-4 bg-gray-50 border-b">
-                <h2 className="font-semibold">የመልዕክት ልውውጦች</h2>
+                <h2 className="font-semibold">{t('messageConversations')}</h2>
               </div>
               <div className="overflow-y-auto h-[calc(600px-57px)]">
                 {conversations.map((conversation) => (
@@ -130,9 +132,7 @@ const MessagesPage = () => {
                         <p className="font-medium truncate">
                           {conversation.guestName}
                         </p>
-                        <p className="text-gray-500 text-sm truncate">
-                          {conversation.propertyName}
-                        </p>
+                        <p className="text-gray-500 text-sm">{t('customer')}</p>
                       </div>
                       {conversation.unreadCount > 0 && (
                         <div className="ml-2 bg-[#D746B7] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -168,7 +168,7 @@ const MessagesPage = () => {
                   <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     {messages.length === 0 ? (
                       <div className="text-center text-gray-500 my-10">
-                        ልውውጡን ለመጀመር መልዕክት ይላኩ
+                        {t('startConversation')}
                       </div>
                     ) : (
                       messages.map((message) => (
@@ -206,7 +206,7 @@ const MessagesPage = () => {
                       type="text"
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="መልዕክት ይፃፉ..."
+                      placeholder={t('sendMessage')}
                       className="flex-1 border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
@@ -226,7 +226,7 @@ const MessagesPage = () => {
                 </>
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">
-                  ልውውጥ ይምረጡ
+                  {t('selectConversation')}
                 </div>
               )}
             </div>

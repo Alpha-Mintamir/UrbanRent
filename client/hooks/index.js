@@ -63,13 +63,12 @@ export const useProvideAuth = () => {
     }
 
     const login = async (formData) => {
-        const { email, password, role } = formData;
+        const { email, password } = formData;
 
         try {
             const { data } = await axiosInstance.post('user/login', {
                 email,
-                password,
-                role: parseInt(role)
+                password
             });
             if (data.user && data.token) {
                 // Ensure role is stored as a number
@@ -89,13 +88,12 @@ export const useProvideAuth = () => {
         }
     }
 
-    const googleLogin = async (credential, role) => {
+    const googleLogin = async (credential) => {
         const decoded = jwt_decode(credential);
         try {
             const { data } = await axiosInstance.post('user/google/login', {
                 name: `${decoded.given_name} ${decoded.family_name}`,
-                email: decoded.email,
-                role: parseInt(role)
+                email: decoded.email
             });
             if (data.user && data.token) {
                 // Ensure role is stored as a number
@@ -134,14 +132,19 @@ export const useProvideAuth = () => {
 
     const uploadPicture = async (picture) => {
         try {
+            console.log('Uploading picture:', picture.name, picture.type, picture.size);
             const formData = new FormData()
             formData.append('picture', picture)
+            
             const { data } = await axiosInstance.post('/user/upload-picture', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
+            
+            console.log('Upload response:', data);
             return data
         } catch (error) {
-            console.log(error)
+            console.error('Error uploading picture:', error.response?.data || error.message);
+            throw error;
         }
     }
 
@@ -149,12 +152,37 @@ export const useProvideAuth = () => {
         const { name, password, picture } = userDetails;
         const email = JSON.parse(getItemFromLocalStorage('user')).email
         try {
+            console.log('Sending update request with picture:', picture ? 'Picture URL exists' : 'No picture');
             const { data } = await axiosInstance.put('/user/update-user', {
                 name, password, email, picture
             })
+            
+            if (data.success && data.user) {
+                console.log('User data from server:', data.user);
+                // Update user in localStorage - stringify and parse to ensure deep copy
+                const updatedUser = JSON.parse(JSON.stringify(data.user));
+                setItemsInLocalStorage('user', updatedUser);
+                
+                // Force a refresh of the user data by fetching the profile
+                try {
+                    const profileResponse = await axiosInstance.get('/user/profile');
+                    if (profileResponse.data.success && profileResponse.data.user) {
+                        console.log('Profile data from server:', profileResponse.data.user);
+                        // Update localStorage with the latest user data
+                        setItemsInLocalStorage('user', profileResponse.data.user);
+                    }
+                } catch (profileError) {
+                    console.error('Error fetching updated profile:', profileError);
+                }
+            }
+            
             return data;
         } catch (error) {
-            console.log(error)
+            console.error('Error updating user:', error.response?.data || error.message);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Failed to update profile'
+            };
         }
     }
 

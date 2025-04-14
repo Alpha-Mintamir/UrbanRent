@@ -3,12 +3,14 @@ import { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 import { useAuth } from '../../../hooks';
+import { useLanguage } from '../../providers/LanguageProvider';
 import SearchBar from './SearchBar';
 import { Avatar, AvatarImage, AvatarFallback } from '@radix-ui/react-avatar';
 
 export const Header = () => {
   const auth = useAuth();
   const location = useLocation();
+  const { language, t } = useLanguage();
 
   const [showSearchBar, setShowSearchBar] = useState(true);
   const [hasShadow, setHasShadow] = useState(false);
@@ -34,8 +36,9 @@ export const Header = () => {
     };
   }, [location]);
 
-  // Check if the user is a property owner (role 2)
+  // Check if the user is a property owner (role 2) or broker (role 3)
   const isPropertyOwner = user && parseInt(user.role) === 2;
+  const isBroker = user && parseInt(user.role) === 3;
 
   return (
     <header
@@ -48,7 +51,7 @@ export const Header = () => {
           showSearchBar ? 'justify-around' : 'justify-between px-10'
         } w-screen max-w-screen-xl`}
       >
-        <a href="/" className="flex items-center gap-1">
+        <a href={isBroker ? "/broker/dashboard" : isPropertyOwner ? "/owner/dashboard" : "/"} className="flex items-center gap-1">
           <img
             className="h-8 w-8 md:h-10 md:w-10"
             src="/assets/logo.ico"
@@ -56,7 +59,7 @@ export const Header = () => {
           />
 
           <span className="hidden text-2xl font-bold text-[#D746B7] md:block">
-            Urban Rent
+            {t('appName')}
           </span>
         </a>
 
@@ -77,7 +80,25 @@ export const Header = () => {
               >
                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
               </svg>
-              <span>Dashboard</span>
+              <span>{t('dashboard')}</span>
+            </Link>
+          )}
+          
+          {/* Broker Dashboard Link */}
+          {isBroker && (
+            <Link
+              to="/broker/dashboard"
+              className="hidden items-center gap-1 rounded-full bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600 md:flex"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <span>{t('dashboard')}</span>
             </Link>
           )}
 

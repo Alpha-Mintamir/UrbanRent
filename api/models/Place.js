@@ -43,6 +43,10 @@ Property.init({
       model: Location,
       key: 'house_no'
     }
+  },
+  is_broker_listing: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   sequelize,

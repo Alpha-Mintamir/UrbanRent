@@ -14,16 +14,20 @@ import PlacesFormPage from './pages/PlacesFormPage';
 import PlacePage from './pages/PlacePage';
 import SingleBookedPlace from './pages/SingleBookedPlace';
 import PropertyOwnerDashboard from './pages/PropertyOwnerDashboard';
+import BrokerDashboard from './pages/BrokerDashboard';
 import ReviewsPage from './pages/ReviewsPage';
 import MessagesPage from './pages/MessagesPage';
 import axiosInstance from './utils/axios';
 import { UserProvider } from './providers/UserProvider';
 import { PlaceProvider } from './providers/PlaceProvider';
+import { LanguageProvider } from './providers/LanguageProvider';
+import { ThemeProvider } from './providers/ThemeProvider';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
 import LocationVerificationPage from './pages/LocationVerificationPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
+import SettingsPage from './pages/SettingsPage';
 import AuthGuard from '@/components/guards/AuthGuard';
 import RoleGuard from '@/components/guards/RoleGuard';
 import Home from './pages/Home';
@@ -37,10 +41,12 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-      <UserProvider>
-        <PlaceProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
+      <ThemeProvider>
+        <LanguageProvider>
+          <UserProvider>
+            <PlaceProvider>
+              <Routes>
+                <Route path="/" element={<Layout />}>
               <Route index element={<Home />} />
               <Route path="/index" element={<IndexPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -57,11 +63,31 @@ function App() {
                 } 
               />
               
+              {/* Broker Dashboard */}
+              <Route 
+                path="/broker/dashboard" 
+                element={
+                  <RoleGuard requiredRole={3}>
+                    <BrokerDashboard />
+                  </RoleGuard>
+                } 
+              />
+              
               {/* Property Owner Reviews */}
               <Route 
                 path="/account/reviews" 
                 element={
                   <RoleGuard requiredRole={2}>
+                    <ReviewsPage />
+                  </RoleGuard>
+                } 
+              />
+              
+              {/* Broker Reviews */}
+              <Route 
+                path="/broker/reviews" 
+                element={
+                  <RoleGuard requiredRole={3}>
                     <ReviewsPage />
                   </RoleGuard>
                 } 
@@ -77,9 +103,44 @@ function App() {
                 } 
               />
               
+              {/* Broker Messages */}
+              <Route 
+                path="/broker/messages" 
+                element={
+                  <RoleGuard requiredRole={3}>
+                    <MessagesPage />
+                  </RoleGuard>
+                } 
+              />
+              
+              {/* Property Owner Places */}
               <Route path="/account/places" element={<PlacesPage />} />
               <Route path="/account/places/new" element={<PlacesFormPage />} />
               <Route path="/account/places/:id" element={<PlacesFormPage />} />
+              
+              {/* Broker Places */}
+              <Route path="/broker/places" element={<PlacesPage />} />
+              <Route path="/broker/places/new" element={<PlacesFormPage />} />
+              <Route path="/broker/places/:id" element={<PlacesFormPage />} />
+              
+              {/* Broker Deals and Clients */}
+              <Route 
+                path="/broker/deals" 
+                element={
+                  <RoleGuard requiredRole={3}>
+                    <BrokerDashboard />
+                  </RoleGuard>
+                } 
+              />
+              <Route 
+                path="/broker/clients" 
+                element={
+                  <RoleGuard requiredRole={3}>
+                    <BrokerDashboard />
+                  </RoleGuard>
+                } 
+              />
+              
               <Route 
                 path="/property/detail/:id" 
                 element={
@@ -101,16 +162,42 @@ function App() {
                 path="/account/bookings/:id"
                 element={<SingleBookedPlace />}
               />
+              {/* Property Owner Location Verification */}
               <Route
                 path="/account/verify-location"
                 element={<LocationVerificationPage />}
               />
+              
+              {/* Broker Location Verification */}
+              <Route
+                path="/broker/verify-location"
+                element={<LocationVerificationPage />}
+              />
+              <Route
+                path="/account/settings"
+                element={
+                  <AuthGuard>
+                    <SettingsPage />
+                  </AuthGuard>
+                }
+              />
+              {/* Broker Settings */}
+              <Route
+                path="/broker/settings"
+                element={
+                  <AuthGuard>
+                    <SettingsPage />
+                  </AuthGuard>
+                }
+              />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
-          </Routes>
-          <ToastContainer autoClose={2000} transition={Slide} />
-        </PlaceProvider>
-      </UserProvider>
+              </Routes>
+              <ToastContainer autoClose={2000} transition={Slide} />
+            </PlaceProvider>
+          </UserProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </GoogleOAuthProvider>
   );
 }

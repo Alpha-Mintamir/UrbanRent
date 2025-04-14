@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { Navigate, useParams } from 'react-router-dom';
 
@@ -10,11 +10,21 @@ import PlacesPage from './PlacesPage';
 import { useAuth } from '../../hooks';
 import { LogOut, Mail, PenSquare, Text } from 'lucide-react';
 import EditProfileDialog from '@/components/ui/EditProfileDialog';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const ProfilePage = () => {
   const auth = useAuth();
   const { user, logout } = auth;
+  const { t } = useLanguage();
   const [redirect, setRedirect] = useState(null);
+  const [profileData, setProfileData] = useState(user);
+  
+  // Update profile data when user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileData(user);
+    }
+  }, [user]);
 
   let { subpage } = useParams();
   if (!subpage) {
@@ -45,15 +55,21 @@ const ProfilePage = () => {
       {subpage === 'profile' && (
         <div className="m-4 flex flex-col items-center gap-8 rounded-[10px]  p-4 sm:h-1/5 sm:flex-row sm:items-stretch lg:gap-28 lg:pl-32 lg:pr-20">
           {/* avatar */}
-          <div className="flex h-40 w-40 justify-center rounded-full bg-gray-200 p-4  sm:h-72 sm:w-72 md:h-96 md:w-96">
-            <Avatar>
-              {user.picture ? (
-                <AvatarImage src={user.picture} />
+          <div className="flex h-40 w-40 justify-center rounded-full bg-gray-200 p-4 sm:h-72 sm:w-72 md:h-96 md:w-96">
+            <Avatar className="h-full w-full">
+              {profileData.picture ? (
+                <AvatarImage 
+                  src={profileData.picture} 
+                  alt={profileData.name}
+                  className="object-cover"
+                />
               ) : (
-                <AvatarImage src="https://res.cloudinary.com/rahul4019/image/upload/v1695133265/pngwing.com_zi4cre.png" className="object-cover"/>
+                <AvatarImage 
+                  src="https://res.cloudinary.com/rahul4019/image/upload/v1695133265/pngwing.com_zi4cre.png" 
+                  className="object-cover"
+                />
               )}
-
-              <AvatarFallback>{user.name.slice([0], [1])}</AvatarFallback>
+              <AvatarFallback>{profileData.name.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
           </div>
 
@@ -63,15 +79,15 @@ const ProfilePage = () => {
               <div className="flex items-center gap-2">
                 <Text height="18" width="18" />
                 <div className="text-xl">
-                  <span>ስም: </span>
-                  <span className="text-gray-600">{user.name}</span>
+                  <span>{t('name')}: </span>
+                  <span className="text-gray-600">{profileData.name}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Mail height="18" width="18" />
                 <div className="text-xl">
-                  <span>ኢሜይል: </span>
-                  <span className="text-gray-600">{user.email}</span>
+                  <span>{t('email')}: </span>
+                  <span className="text-gray-600">{profileData.email}</span>
                 </div>
               </div>
               <p></p>
@@ -84,7 +100,7 @@ const ProfilePage = () => {
 
               <Button variant="secondary" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                {t('logout')}
               </Button>
             </div>
           </div>

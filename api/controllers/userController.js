@@ -2,6 +2,7 @@ const User = require('../models/User');
 const cookieToken = require('../utils/cookieToken');
 const bcrypt = require('bcryptjs')
 const cloudinary = require('cloudinary').v2;
+const jwt = require('jsonwebtoken');
 
 
 // Register/SignUp user
@@ -48,12 +49,12 @@ exports.register = async (req, res) => {
 // Login/SignIn user
 exports.login = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
-    // check for presence of email, password and role
-    if (!email || !password || !role) {
+    // check for presence of email and password
+    if (!email || !password) {
       return res.status(400).json({
-        message: 'Email, password and role are required!',
+        message: 'Email and password are required!',
       });
     }
 
@@ -74,12 +75,8 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Check if the user has the requested role - strict check
-    if (parseInt(user.role) !== parseInt(role)) {
-      return res.status(403).json({
-        message: 'Invalid role for this account. Please select the correct role.',
-      });
-    }
+    // Log the user's role for debugging
+    console.log(`User ${email} authenticated successfully with role: ${user.role}`);
 
     // if everything is fine we will send the token
     cookieToken(user, res);
@@ -95,11 +92,11 @@ exports.login = async (req, res) => {
 // Google Login
 exports.googleLogin = async (req, res) => {
   try {
-    const { name, email, role } = req.body;
+    const { name, email } = req.body;
 
-    if (!name || !email || !role) {
+    if (!name || !email) {
       return res.status(400).json({
-        message: 'Name, email and role are required'
+        message: 'Name and email are required'
       });
     }
 
@@ -109,20 +106,17 @@ exports.googleLogin = async (req, res) => {
     // If the user does not exist, create a new user in the DB  
     if (!user) {
       const randomPassword = Math.random().toString(36).slice(-8);
+      // Default to tenant role (1) for new Google users
       user = await User.register({
         name,
         email,
         password: randomPassword,
-        role: parseInt(role)
+        role: 1 // Default to tenant role
       });
-    } else {
-      // Strict role check for existing users
-      if (parseInt(user.role) !== parseInt(role)) {
-        return res.status(403).json({
-          message: 'Invalid role for this account. Please select the correct role.',
-        });
-      }
     }
+
+    // Log the user's role for debugging
+    console.log(`Google user ${email} authenticated with role: ${user.role}`);
 
     // send the token
     cookieToken(user, res);
@@ -157,6 +151,13 @@ exports.updateUserDetails = async (req, res) => {
   try {
     const { name, password, email, picture } = req.body
 
+    console.log('Update request received:', { 
+      name, 
+      email, 
+      password: password ? '********' : undefined,
+      picture: picture ? 'Picture URL exists' : 'No picture URL'
+    });
+
     const user = await User.findByEmail(email);
 
     if (!user) {
@@ -165,11 +166,28 @@ exports.updateUserDetails = async (req, res) => {
       });
     }
 
-    // TODO: Implement user update in PostgreSQL model
-    // This needs to be implemented in the User model
+    // Use the updateUser method from the User model
+    const updatedUser = await User.updateUser({
+      user_id: user.user_id,
+      name,
+      password: password || undefined, // Only update if provided
+      picture: picture || undefined // Only update if provided
+    });
+    
+    if (!updatedUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to update user'
+      });
+    }
+    
+    console.log('User updated successfully:', {
+      name: updatedUser.name,
+      picture: updatedUser.picture ? 'Picture URL exists' : 'No picture URL'
+    });
     
     // After updating user, send token
-    cookieToken(user, res);
+    cookieToken(updatedUser, res);
   } catch (error) {
     console.error('Update user error:', error);
     res.status(500).json({ 
@@ -178,6 +196,47 @@ exports.updateUserDetails = async (req, res) => {
     });
   }
 }
+
+// Get user profile
+exports.getUserProfile = async (req, res) => {
+  try {
+    // Get token from cookies
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Login first to access this resource'
+      });
+    }
+    
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Get user from database
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Return user data
+    res.status(200).json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
 
 // Logout
 exports.logout = async (req, res) => {

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosInstance from '@/utils/axios';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 // Comprehensive fallback data for locations in Addis Ababa
 const FALLBACK_SUB_CITIES = [
@@ -50,6 +51,11 @@ Object.keys(FALLBACK_WOREDAS).forEach(subCity => {
 
 const LocationVerificationPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { language, t } = useLanguage();
+  
+  // Determine if we're in broker mode based on the URL path
+  const isBrokerMode = location.pathname.startsWith('/broker');
 
   const [locationData, setLocationData] = useState({
     kifleKetema: '',
@@ -230,15 +236,17 @@ const LocationVerificationPage = () => {
         area_name: locationData.areaName
       };
       
-      // Store the location data directly in localStorage without sending to server
-      localStorage.setItem('locationData', JSON.stringify(locationDataToSubmit));
-      console.log('Location data saved to localStorage:', locationDataToSubmit);
+      // Store location data in localStorage for use in place creation
+      localStorage.setItem('locationData', JSON.stringify(locationData));
       
-      toast.info('አሁን የንብረት ዝርዝር መረጃዎችን ያስገቡ');
-      navigate('/account/places/new'); // Navigate to place creation page
+      // Show success message
+      toast.info(language === 'am' ? 'የአካባቢ መረጃ በተሳካ ሁኔታ ተመዝግቧል። አሁን የንብረት ዝርዝር መረጃ ያስገቡ።' : 'Location verified successfully. Now add your property details.');
+      
+      // Navigate to place creation page based on user role
+      navigate(isBrokerMode ? '/broker/places/new' : '/account/places/new');
     } catch (error) {
       console.error('Error saving location data:', error);
-      toast.error('የአካባቢ መረጃ ማስቀመጥ አልተሳካም. እባክዎ ዳግም ይሞክሩ.');
+      toast.error(language === 'am' ? 'የአካባቢ መረጃ ማስቀመጥ አልተሳካም. እባክዎ ዳግም ይሞክሩ.' : 'Failed to save location data. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -247,11 +255,11 @@ const LocationVerificationPage = () => {
   return (
     <div className="mt-4 flex grow items-center justify-around">
       <div className="mb-64 w-full max-w-md">
-        <h1 className="mb-8 text-center text-4xl">የአካባቢ መረጃ</h1>
+        <h1 className="mb-8 text-center text-4xl">{t('locationVerification')}</h1>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
-            <label className="mb-2 block">ክፍለ ከተማ:</label>
+            <label className="mb-2 block">{t('subCity')}:</label>
             <select
               name="kifleKetema"
               value={locationData.kifleKetema}
@@ -259,7 +267,7 @@ const LocationVerificationPage = () => {
               className="w-full rounded-md border border-gray-300 p-2"
               disabled={isLoading}
             >
-              <option value="">ይምረጡ</option>
+              <option value="">{t('selectSubCity')}</option>
               {subCities.map((city) => (
                 <option key={city} value={city}>
                   {city}
@@ -268,7 +276,7 @@ const LocationVerificationPage = () => {
             </select>
           </div>
           <div className="col-span-2">
-            <label className="mb-2 block">ወረዳ:</label>
+            <label className="mb-2 block">{t('woreda')}:</label>
             <select
               name="wereda"
               value={locationData.wereda}
@@ -276,7 +284,7 @@ const LocationVerificationPage = () => {
               className="w-full rounded-md border border-gray-300 p-2"
               disabled={!locationData.kifleKetema || isLoading}
             >
-              <option value="">ይምረጡ</option>
+              <option value="">{t('selectWoreda')}</option>
               {woredas.map((woreda) => (
                 <option key={woreda} value={woreda}>
                   {woreda}
@@ -285,7 +293,7 @@ const LocationVerificationPage = () => {
             </select>
           </div>
           <div className="col-span-2">
-            <label className="mb-2 block">ቀበሌ:</label>
+            <label className="mb-2 block">{t('kebele')}:</label>
             <select
               name="kebele"
               value={locationData.kebele}
@@ -293,7 +301,7 @@ const LocationVerificationPage = () => {
               className="w-full rounded-md border border-gray-300 p-2"
               disabled={!locationData.wereda || isLoading}
             >
-              <option value="">ይምረጡ</option>
+              <option value="">{t('selectKebele')}</option>
               {kebeles.map((kebele) => (
                 <option key={kebele} value={kebele}>
                   {kebele}
@@ -302,24 +310,24 @@ const LocationVerificationPage = () => {
             </select>
           </div>
           <div className="col-span-2">
-            <label className="mb-2 block">የቤት ቁጥር:</label>
+            <label className="mb-2 block">{t('houseNumber')}:</label>
             <input
               type="text"
               name="houseNumber"
               value={locationData.houseNumber}
               onChange={handleInputChange}
-              placeholder="የቤት ቁጥር ያስገቡ"
+              placeholder={t('enterHouseNumber')}
               className="w-full rounded-md border border-gray-300 p-2"
             />
           </div>
           <div className="col-span-2">
-            <label className="mb-2 block">የአካባቢ ስም:</label>
+            <label className="mb-2 block">{t('areaName')}:</label>
             <input
               type="text"
               name="areaName"
               value={locationData.areaName}
               onChange={handleInputChange}
-              placeholder="የአካባቢ ስም ያስገቡ"
+              placeholder={t('enterAreaName')}
               className="w-full rounded-md border border-gray-300 p-2"
             />
           </div>
@@ -331,7 +339,9 @@ const LocationVerificationPage = () => {
             disabled={isLoading}
             className="rounded-full bg-[#D746B7] px-6 py-3 text-white disabled:bg-gray-400"
           >
-            {isLoading ? 'እየተላከ ነው...' : 'አረጋግጥ እና ቀጥል'}
+            {isLoading 
+              ? (language === 'am' ? 'እየተላከ ነው...' : 'Loading...') 
+              : (language === 'am' ? 'አረጋግጥ እና ቀጥል' : 'Verify and Continue')}
           </button>
         </div>
       </div>

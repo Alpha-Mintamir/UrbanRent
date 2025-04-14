@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 import axiosInstance from '@/utils/axios';
@@ -24,11 +24,15 @@ const getUserData = () => {
 
 const PlacesFormPage = () => {
   const { id } = useParams();
+  const location = useLocation();
   const [redirect, setRedirect] = useState(null);
   const [loading, setLoading] = useState(false);
   const [addedPhotos, setAddedPhotos] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [locationData, setLocationData] = useState(null);
+  
+  // Determine if we're in broker mode based on the URL path
+  const isBrokerMode = location.pathname.startsWith('/broker');
 
   const [formData, setFormData] = useState({
     property_name: '',
@@ -235,8 +239,12 @@ const PlacesFormPage = () => {
           id,
           ...propertyData,
         });
-        toast.success('ንብረት በተሳካ ሁኔታ ተዘምኗል!');
-        setRedirect('/owner/dashboard');
+        if (data) {
+          toast.success('ንብረት በተሳካ ሁኔታ ተመዝግቧል!');
+          setRedirect(isBrokerMode ? '/broker/places' : '/account/places');
+        } else {
+          toast.error('ንብረት ማስገባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።');
+        }
       } else {
         // new place - send both property and location data together
         const { data } = await axiosInstance.post(

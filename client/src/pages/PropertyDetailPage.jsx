@@ -4,10 +4,12 @@ import { toast } from 'react-toastify';
 import axiosInstance from '@/utils/axios';
 import AccountNav from '@/components/ui/AccountNav';
 import Spinner from '@/components/ui/Spinner';
+import { useLanguage } from '@/providers/LanguageProvider';
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,8 +23,9 @@ const PropertyDetailPage = () => {
         setProperty(data);
       } catch (error) {
         console.error('Error fetching property details:', error);
-        setError('ንብረቱን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።');
-        toast.error('ንብረቱን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።');
+        const errorMessage = language === 'am' ? 'ንብረቱን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።' : 'Could not find the property. Please try again.';
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -49,7 +52,7 @@ const PropertyDetailPage = () => {
           to="/owner/dashboard"
           className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
-          ወደ ዳሽቦርድ ተመለስ
+          {t('returnToDashboard')}
         </Link>
       </div>
     );
@@ -58,12 +61,12 @@ const PropertyDetailPage = () => {
   if (!property) {
     return (
       <div className="flex h-screen flex-col items-center justify-center">
-        <div className="mb-4 text-xl">ንብረቱ አልተገኘም</div>
+        <div className="mb-4 text-xl">{language === 'am' ? 'ንብረቱ አልተገኘም' : 'Property not found'}</div>
         <Link
           to="/owner/dashboard"
           className="rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
-          ወደ ዳሽቦርድ ተመለስ
+          {t('returnToDashboard')}
         </Link>
       </div>
     );
@@ -72,7 +75,7 @@ const PropertyDetailPage = () => {
   // Format perks for display
   const formatPerks = (perks) => {
     if (!perks || !Array.isArray(perks) || perks.length === 0) {
-      return 'ምንም አገልግሎቶች አልተመዘገቡም';
+      return language === 'am' ? 'ምንም አገልግሎቶች አልተመዘገቡም' : 'No amenities registered';
     }
     
     return perks.map(perk => 
@@ -80,11 +83,35 @@ const PropertyDetailPage = () => {
     ).join(', ');
   };
 
-  // Format location data for display
-  const formatLocation = (location) => {
-    if (!location) return 'ምንም የአድራሻ መረጃ አልተመዘገበም';
+  // Get location data for display
+  const getLocationData = (location) => {
+    if (!location) return null;
     
-    return `${location.sub_city || ''}, ${location.woreda || ''}, ${location.kebele || ''}, ${location.area_name || ''}`;
+    // Create an object with location parts that exist
+    const locationData = {};
+    if (location.sub_city) locationData.subCity = {
+      label: language === 'am' ? 'ክፍለ ከተማ' : 'Sub City',
+      value: location.sub_city
+    };
+    if (location.woreda) locationData.woreda = {
+      label: language === 'am' ? 'ወረዳ' : 'Woreda',
+      value: location.woreda
+    };
+    if (location.kebele) locationData.kebele = {
+      label: language === 'am' ? 'ቀበለ' : 'Kebele',
+      value: location.kebele
+    };
+    if (location.area_name) locationData.areaName = {
+      label: language === 'am' ? 'የአካባቢ ስም' : 'Area Name',
+      value: location.area_name
+    };
+    
+    // If no parts exist, return null
+    if (Object.keys(locationData).length === 0) {
+      return null;
+    }
+    
+    return locationData;
   };
 
   return (
@@ -97,13 +124,13 @@ const PropertyDetailPage = () => {
             onClick={() => navigate(`/account/places/${property.property_id}`)}
             className="rounded-md bg-[#D746B7] px-4 py-2 text-white hover:bg-[#c13da3]"
           >
-            አርትዕ
+            {t('edit')}
           </button>
         </div>
 
         {/* Property Images */}
         <div className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">ፎቶዎች</h2>
+          <h2 className="mb-3 text-xl font-semibold">{language === 'am' ? 'ፎቶዎች' : 'Photos'}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
             {property.photos && Array.isArray(property.photos) && property.photos.length > 0 ? (
               property.photos.map((photo, index) => (
@@ -121,7 +148,7 @@ const PropertyDetailPage = () => {
               ))
             ) : (
               <div className="col-span-full text-center text-gray-500">
-                ምንም ፎቶዎች አልተጫኑም
+                {language === 'am' ? 'ምንም ፎቶዎች አልተጫኑም' : 'No photos uploaded'}
               </div>
             )}
           </div>
@@ -129,38 +156,59 @@ const PropertyDetailPage = () => {
 
         {/* Property Details */}
         <div className="mb-8 rounded-lg bg-gray-50 p-6 shadow-sm">
-          <h2 className="mb-4 text-xl font-semibold">የንብረት ዝርዝር</h2>
+          <h2 className="mb-4 text-xl font-semibold">{t('propertyDetails')}</h2>
           
           <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <h3 className="font-medium text-gray-700">ዋጋ</h3>
-              <p className="text-xl font-bold text-[#D746B7]">ETB {property.price}/ወር</p>
+              <h3 className="font-medium text-gray-700">{language === 'am' ? 'ዋጋ' : 'Price'}</h3>
+              <p className="text-xl font-bold text-[#D746B7]">ETB {property.price}/{language === 'am' ? 'ወር' : 'month'}</p>
             </div>
             
             <div>
-              <h3 className="font-medium text-gray-700">ከፍተኛ የእንግዶች ብዛት</h3>
-              <p>{property.max_guests} ሰዎች</p>
+              <h3 className="font-medium text-gray-700">{language === 'am' ? 'ከፍተኛ የእንግዶች ብዛት' : 'Maximum Guests'}</h3>
+              <p>{property.max_guests} {language === 'am' ? 'ሰዎች' : 'people'}</p>
             </div>
           </div>
           
           <div className="mb-4">
-            <h3 className="font-medium text-gray-700">አድራሻ</h3>
-            <p>{formatLocation(property.location)}</p>
+            <h3 className="font-medium text-gray-700 mb-2">{language === 'am' ? 'አድራሻ' : 'Address'}</h3>
+            {property.location ? (
+              <div className="bg-gray-100 rounded-lg p-4 shadow-inner">
+                {getLocationData(property.location) ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.values(getLocationData(property.location)).map((item, index) => (
+                      <div key={index} className="flex flex-col">
+                        <span className="text-sm text-gray-500">{item.label}</span>
+                        <span className="font-medium text-gray-800">{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">
+                    {language === 'am' ? 'ምንም የአድራሻ መረጃ አልተመዘገበም' : 'No address information registered'}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-500 italic">
+                {language === 'am' ? 'ምንም የአድራሻ መረጃ አልተመዘገበም' : 'No address information registered'}
+              </p>
+            )}
           </div>
           
           <div className="mb-4">
-            <h3 className="font-medium text-gray-700">መግለጫ</h3>
+            <h3 className="font-medium text-gray-700">{language === 'am' ? 'መግለጫ' : 'Description'}</h3>
             <p className="whitespace-pre-line">{property.description}</p>
           </div>
           
           <div className="mb-4">
-            <h3 className="font-medium text-gray-700">አገልግሎቶች</h3>
+            <h3 className="font-medium text-gray-700">{language === 'am' ? 'አገልግሎቶች' : 'Amenities'}</h3>
             <p>{formatPerks(property.perks)}</p>
           </div>
           
           {property.extra_info && (
             <div>
-              <h3 className="font-medium text-gray-700">ተጨማሪ መረጃ</h3>
+              <h3 className="font-medium text-gray-700">{language === 'am' ? 'ተጨማሪ መረጃ' : 'Additional Information'}</h3>
               <p className="whitespace-pre-line">{property.extra_info}</p>
             </div>
           )}
@@ -171,14 +219,14 @@ const PropertyDetailPage = () => {
             to="/account/places"
             className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
           >
-            ወደ ንብረቶች ዝርዝር ተመለስ
+            {language === 'am' ? 'ወደ ንብረቶች ዝርዝር ተመለስ' : 'Return to Properties List'}
           </Link>
           
           <button
             onClick={() => navigate(`/account/places/${property.property_id}`)}
             className="rounded-md bg-[#D746B7] px-4 py-2 text-white hover:bg-[#c13da3]"
           >
-            አርትዕ
+            {t('edit')}
           </button>
         </div>
       </div>

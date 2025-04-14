@@ -37,11 +37,11 @@ exports.addPlace = async (req, res) => {
       });
     }
     
-    // Check if the user has role 2 (property owner)
-    if (user.role !== 2) {
+    // Check if the user has role 2 (property owner) or role 3 (broker)
+    if (user.role !== 2 && user.role !== 3) {
       return res.status(403).json({
-        message: 'User is not a property owner',
-        error: 'Only users with property owner role can create properties'
+        message: 'User is not authorized to create properties',
+        error: 'Only property owners or brokers can create properties'
       });
     }
     
@@ -131,7 +131,8 @@ exports.addPlace = async (req, res) => {
       extra_info,
       max_guests: parseInt(max_guests),
       price: parseFloat(price),
-      location_id: locationId
+      location_id: locationId,
+      is_broker_listing: user.role === 3, // Set to true if the user is a broker
     };
     
     console.log('Creating property with data:', propertyData);
@@ -187,10 +188,22 @@ exports.addPlace = async (req, res) => {
 // Returns user specific places
 exports.userPlaces = async (req, res) => {
   try {
+    // Get user data from the request
     const userData = req.user;
-    const id = userData.id;
     
+    if (!userData || !userData.id) {
+      console.error('User not authenticated or missing ID');
+      return res.status(401).json({
+        message: 'User authentication required',
+        error: 'No authenticated user found'
+      });
+    }
+    
+    const id = userData.id;
     console.log('Fetching places for user ID:', id);
+    
+    // Log the user object for debugging
+    console.log('User object:', JSON.stringify(userData, null, 2));
     
     // Use Sequelize syntax instead of MongoDB syntax
     const places = await Place.findAll({
@@ -215,6 +228,12 @@ exports.userPlaces = async (req, res) => {
     });
     
     console.log(`Found ${places.length} places for user ID ${id}`);
+    
+    // Log each property for debugging
+    places.forEach((place, index) => {
+      console.log(`Property ${index + 1}:`, place.property_id, place.property_name, 'user_id:', place.user_id);
+    });
+    
     res.status(200).json(places);
   } catch (err) {
     console.error('Error fetching user places:', err);
@@ -262,7 +281,8 @@ exports.updatePlace = async (req, res) => {
         extra_info,
         max_guests,
         price,
-        location_id: location_id || place.location_id
+        location_id: location_id || place.location_id,
+        is_broker_listing: userData.role === 3 // Set is_broker_listing to true if user is a broker (role 3)
       });
       
       // Update perks if provided
