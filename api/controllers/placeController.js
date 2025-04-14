@@ -189,10 +189,38 @@ exports.userPlaces = async (req, res) => {
   try {
     const userData = req.user;
     const id = userData.id;
-    res.status(200).json(await Place.find({ owner: id }));
+    
+    console.log('Fetching places for user ID:', id);
+    
+    // Use Sequelize syntax instead of MongoDB syntax
+    const places = await Place.findAll({
+      where: { user_id: id },
+      include: [
+        {
+          model: require('../models/Location'),
+          as: 'location',
+          required: false
+        },
+        {
+          model: require('../models/Perk'),
+          as: 'perks',
+          required: false
+        },
+        {
+          model: require('../models/photo'),
+          as: 'photos',
+          required: false
+        }
+      ]
+    });
+    
+    console.log(`Found ${places.length} places for user ID ${id}`);
+    res.status(200).json(places);
   } catch (err) {
+    console.error('Error fetching user places:', err);
     res.status(500).json({
-      message: 'Internal serever error',
+      message: 'Internal server error',
+      error: err.message || 'Unknown error'
     });
   }
 };
@@ -273,13 +301,36 @@ exports.updatePlace = async (req, res) => {
 // Returns all the places in DB
 exports.getPlaces = async (req, res) => {
   try {
-    const places = await Place.find();
-    res.status(200).json({
-      places,
+    console.log('Fetching all places');
+    
+    // Use Sequelize syntax instead of MongoDB syntax
+    const places = await Place.findAll({
+      include: [
+        {
+          model: require('../models/Location'),
+          as: 'location',
+          required: false
+        },
+        {
+          model: require('../models/Perk'),
+          as: 'perks',
+          required: false
+        },
+        {
+          model: require('../models/photo'),
+          as: 'photos',
+          required: false
+        }
+      ]
     });
+    
+    console.log(`Found ${places.length} places in total`);
+    res.status(200).json(places);
   } catch (err) {
+    console.error('Error fetching all places:', err);
     res.status(500).json({
       message: 'Internal server error',
+      error: err.message || 'Unknown error'
     });
   }
 };
@@ -288,18 +339,89 @@ exports.getPlaces = async (req, res) => {
 exports.singlePlace = async (req, res) => {
   try {
     const { id } = req.params;
-    const place = await Place.findById(id);
+    console.log('Fetching place with ID:', id);
+    
+    // Use Sequelize syntax instead of MongoDB syntax
+    const place = await Place.findByPk(id, {
+      include: [
+        {
+          model: require('../models/Location'),
+          as: 'location',
+          required: false
+        },
+        {
+          model: require('../models/Perk'),
+          as: 'perks',
+          required: false
+        },
+        {
+          model: require('../models/photo'),
+          as: 'photos',
+          required: false
+        }
+      ]
+    });
+    
     if (!place) {
-      return res.status(400).json({
+      console.log(`Place with ID ${id} not found`);
+      return res.status(404).json({
         message: 'Place not found',
       });
     }
-    res.status(200).json({
-      place,
-    });
+    
+    console.log(`Found place with ID ${id}`);
+    res.status(200).json(place);
   } catch (err) {
+    console.error('Error fetching single place:', err);
     res.status(500).json({
-      message: 'Internal serever error',
+      message: 'Internal server error',
+      error: err.message || 'Unknown error'
+    });
+  }
+};
+
+// Returns single place by property_id for edit page
+exports.singlePlaceById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log('Fetching place for edit with property_id:', id);
+    
+    // Use Sequelize syntax with property_id
+    const place = await Place.findOne({
+      where: { property_id: id },
+      include: [
+        {
+          model: require('../models/Location'),
+          as: 'location',
+          required: false
+        },
+        {
+          model: require('../models/Perk'),
+          as: 'perks',
+          required: false
+        },
+        {
+          model: require('../models/photo'),
+          as: 'photos',
+          required: false
+        }
+      ]
+    });
+    
+    if (!place) {
+      console.log(`Place with property_id ${id} not found`);
+      return res.status(404).json({
+        message: 'Place not found',
+      });
+    }
+    
+    console.log(`Found place with property_id ${id}`);
+    res.status(200).json(place);
+  } catch (err) {
+    console.error('Error fetching single place by id:', err);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: err.message || 'Unknown error'
     });
   }
 };
@@ -308,16 +430,74 @@ exports.singlePlace = async (req, res) => {
 exports.searchPlaces = async (req, res) => {
   try {
     const searchword = req.params.key;
-
-    if (searchword === '') return res.status(200).json(await Place.find())
-
-    const searchMatches = await Place.find({ address: { $regex: searchword, $options: "i" } })
-
+    console.log('Searching places with keyword:', searchword);
+    
+    const { Op } = require('sequelize');
+    
+    if (searchword === '') {
+      // Return all places if no search term
+      const allPlaces = await Place.findAll({
+        include: [
+          {
+            model: require('../models/Location'),
+            as: 'location',
+            required: false
+          },
+          {
+            model: require('../models/Perk'),
+            as: 'perks',
+            required: false
+          },
+          {
+            model: require('../models/photo'),
+            as: 'photos',
+            required: false
+          }
+        ]
+      });
+      return res.status(200).json(allPlaces);
+    }
+    
+    // Search in property_name, description, and location fields
+    const searchMatches = await Place.findAll({
+      where: {
+        [Op.or]: [
+          { property_name: { [Op.iLike]: `%${searchword}%` } },
+          { description: { [Op.iLike]: `%${searchword}%` } }
+        ]
+      },
+      include: [
+        {
+          model: require('../models/Location'),
+          as: 'location',
+          where: {
+            [Op.or]: [
+              { sub_city: { [Op.iLike]: `%${searchword}%` } },
+              { area_name: { [Op.iLike]: `%${searchword}%` } }
+            ]
+          },
+          required: false
+        },
+        {
+          model: require('../models/Perk'),
+          as: 'perks',
+          required: false
+        },
+        {
+          model: require('../models/photo'),
+          as: 'photos',
+          required: false
+        }
+      ]
+    });
+    
+    console.log(`Found ${searchMatches.length} matches for search term '${searchword}'`);
     res.status(200).json(searchMatches);
   } catch (err) {
-    console.log(err)
+    console.error('Error searching places:', err);
     res.status(500).json({
-      message: 'Internal serever error 1',
+      message: 'Internal server error',
+      error: err.message || 'Unknown error'
     });
   }
 }

@@ -23,6 +23,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
 import LocationVerificationPage from './pages/LocationVerificationPage';
+import PropertyDetailPage from './pages/PropertyDetailPage';
 import AuthGuard from '@/components/guards/AuthGuard';
 import RoleGuard from '@/components/guards/RoleGuard';
 import Home from './pages/Home';
@@ -79,6 +80,14 @@ function App() {
               <Route path="/account/places" element={<PlacesPage />} />
               <Route path="/account/places/new" element={<PlacesFormPage />} />
               <Route path="/account/places/:id" element={<PlacesFormPage />} />
+              <Route 
+                path="/property/detail/:id" 
+                element={
+                  <AuthGuard>
+                    <PropertyDetailPage />
+                  </AuthGuard>
+                } 
+              />
               <Route 
                 path="/place/:id" 
                 element={

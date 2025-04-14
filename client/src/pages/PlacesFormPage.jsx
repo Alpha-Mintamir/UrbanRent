@@ -24,7 +24,7 @@ const getUserData = () => {
 
 const PlacesFormPage = () => {
   const { id } = useParams();
-  const [redirect, setRedirect] = useState(false);
+  const [redirect, setRedirect] = useState(null);
   const [loading, setLoading] = useState(false);
   const [addedPhotos, setAddedPhotos] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -100,23 +100,44 @@ const PlacesFormPage = () => {
       return;
     }
     setLoading(true);
-    axiosInstance.get(`/places/${id}`).then((response) => {
-      const { place } = response.data;
-      // update the state of formData
-      for (let key in formData) {
-        if (place.hasOwnProperty(key)) {
-          setFormData((prev) => ({
-            ...prev,
-            [key]: place[key],
-          }));
+    
+    // Use the correct endpoint for Sequelize
+    axiosInstance.get(`/places/single-place/${id}`)
+      .then((response) => {
+        console.log('Fetched place details:', response.data);
+        const place = response.data; // Direct data object, not nested under 'place'
+        
+        // Update the state of formData
+        setFormData({
+          property_name: place.property_name || '',
+          description: place.description || '',
+          extra_info: place.extra_info || '',
+          max_guests: place.max_guests || 4,
+          price: place.price || 5000,
+          perks: place.perks?.map(perk => perk.name) || [],
+        });
+
+        // Update photos state
+        if (place.photos && Array.isArray(place.photos)) {
+          // Handle different photo formats
+          if (place.photos.length > 0) {
+            if (typeof place.photos[0] === 'object' && place.photos[0].url) {
+              // If photos are objects with url property
+              setAddedPhotos(place.photos.map(photo => photo.url));
+            } else if (typeof place.photos[0] === 'string') {
+              // If photos are direct URLs
+              setAddedPhotos(place.photos);
+            }
+          }
         }
-      }
 
-      // update photos state separately
-      setAddedPhotos([...place.photos]);
-
-      setLoading(false);
-    });
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching place details:', error);
+        toast.error('ንብረቱን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።');
+        setLoading(false);
+      });
   }, [id]);
 
   const preInput = (header, description) => {
@@ -215,7 +236,7 @@ const PlacesFormPage = () => {
           ...propertyData,
         });
         toast.success('ንብረት በተሳካ ሁኔታ ተዘምኗል!');
-        setRedirect(true);
+        setRedirect('/owner/dashboard');
       } else {
         // new place - send both property and location data together
         const { data } = await axiosInstance.post(
@@ -225,7 +246,7 @@ const PlacesFormPage = () => {
         toast.success('ንብረት በተሳካ ሁኔታ ተጨምሯል!');
         // Clear the location data from localStorage after successful submission
         localStorage.removeItem('locationData');
-        setRedirect(true);
+        setRedirect('/owner/dashboard');
       }
     } catch (error) {
       console.error('Error saving property:', error);
@@ -261,7 +282,7 @@ const PlacesFormPage = () => {
   };
 
   if (redirect) {
-    return <Navigate to={'/account/places'} />;
+    return <Navigate to={redirect} />;
   }
 
   if (loading) {

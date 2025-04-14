@@ -20,12 +20,31 @@ const PropertyOwnerDashboard = () => {
         const { data } = await axiosInstance.get('/user/profile');
         setUserInfo(data);
         
-        // Fetch user's properties count
-        const propertiesResponse = await axiosInstance.get('/places/user-places');
-        setStats(prev => ({
-          ...prev,
-          totalProperties: propertiesResponse.data.length
-        }));
+        // Fetch user's properties
+        try {
+          const propertiesResponse = await axiosInstance.get('/places/user-places');
+          console.log('User properties:', propertiesResponse.data);
+          
+          if (Array.isArray(propertiesResponse.data)) {
+            setStats(prev => ({
+              ...prev,
+              totalProperties: propertiesResponse.data.length
+            }));
+          } else {
+            console.error('Unexpected response format for properties:', propertiesResponse.data);
+            setStats(prev => ({
+              ...prev,
+              totalProperties: 0
+            }));
+          }
+        } catch (propertyError) {
+          console.error('Error fetching properties:', propertyError);
+          // Don't fail the entire dashboard if just properties fail
+          setStats(prev => ({
+            ...prev,
+            totalProperties: 0
+          }));
+        }
         
         // Here you would also fetch reviews and messages counts
         // This is a placeholder for when those APIs are implemented
@@ -120,9 +139,29 @@ const PropertyOwnerDashboard = () => {
           <h2 className="text-2xl font-semibold mb-4">የቅርብ ጊዜ እንቅስቃሴዎች</h2>
           <div className="space-y-4">
             {stats.totalProperties > 0 ? (
-              <p className="text-gray-600">የእርስዎ ንብረቶች በገበያ ላይ ናቸው። ለማየት "የእኔ ንብረቶች" የሚለውን ይጫኑ።</p>
+              <>
+                <p className="text-gray-600">የእርስዎ {stats.totalProperties} ንብረቶች በገበያ ላይ ናቸው። ለማየት "የእኔ ንብረቶች" የሚለውን ይጫኑ።</p>
+                <div className="mt-4">
+                  <button 
+                    onClick={() => navigate('/account/places')} 
+                    className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors"
+                  >
+                    የእኔ ንብረቶችን አሳየኝ
+                  </button>
+                </div>
+              </>
             ) : (
-              <p className="text-gray-600">እስካሁን ምንም ንብረት አላስገቡም። አዲስ ንብረት ለማስገባት "አዲስ ንብረት ያስገቡ" የሚለውን ይጫኑ።</p>
+              <>
+                <p className="text-gray-600">እስካሁን ምንም ንብረት አላስገቡም። አዲስ ንብረት ለማስገባት "አዲስ ንብረት ያስገቡ" የሚለውን ይጫኑ።</p>
+                <div className="mt-4">
+                  <button 
+                    onClick={() => navigate('/account/verify-location')} 
+                    className="bg-[#D746B7] hover:bg-[#c13da3] text-white py-2 px-4 rounded-md transition-colors"
+                  >
+                    አዲስ ንብረት ያስገቡ
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

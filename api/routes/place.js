@@ -7,6 +7,7 @@ const {
   getPlaces,
   updatePlace,
   singlePlace,
+  singlePlaceById,
   userPlaces,
   searchPlaces
 } = require('../controllers/placeController');
@@ -18,9 +19,13 @@ router.route('/add-places').post(isLoggedIn, addPlace);
 router.route('/user-places').get(isLoggedIn, userPlaces);
 router.route('/update-place').put(isLoggedIn, updatePlace);
 
-// Not Protected routed but sequence should not be interfered with above routes
+// Not Protected routes - ORDER MATTERS HERE!
+// More specific routes must come before generic ones
+router.route('/search/:key').get(searchPlaces);
+router.route('/single-place/:id').get(singlePlaceById); // Specific endpoint for property edit page
+
+// This generic route must come last as it will match any /:id pattern
 router.route('/:id').get(singlePlace);
-router.route('/search/:key').get(searchPlaces)
 
 
 module.exports = router;

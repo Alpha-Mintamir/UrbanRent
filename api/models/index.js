@@ -10,10 +10,14 @@ const Photo = require('./photo');
 User.hasMany(Property, { foreignKey: 'user_id' });
 Property.belongsTo(User, { foreignKey: 'user_id' });
 
-Property.hasMany(Perk, { foreignKey: 'property_id' });
+// Add association between Property and Location
+Property.belongsTo(Location, { foreignKey: 'location_id', as: 'location' });
+Location.hasMany(Property, { foreignKey: 'location_id' });
+
+Property.hasMany(Perk, { foreignKey: 'property_id', as: 'perks' });
 Perk.belongsTo(Property, { foreignKey: 'property_id' });
 
-Property.hasMany(Photo, { foreignKey: 'property_id' });
+Property.hasMany(Photo, { foreignKey: 'property_id', as: 'photos' });
 Photo.belongsTo(Property, { foreignKey: 'property_id' });
 
 // Sync all models with the database
