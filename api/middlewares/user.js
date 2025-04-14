@@ -24,7 +24,27 @@ exports.isLoggedIn = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = await User.findById(decoded.id);
+        console.log('JWT decoded:', decoded); // Log the decoded token
+        
+        // Find the user by ID
+        const user = await User.findById(decoded.id);
+        
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not found',
+            });
+        }
+        
+        // Set the user object in the request with the correct ID
+        req.user = {
+            id: user.user_id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+        };
+        
+        console.log('User authenticated:', req.user); // Log the authenticated user
         next();
     } catch (error) {
         // Handle JWT verification error

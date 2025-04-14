@@ -110,7 +110,9 @@ const IdentityVerificationPage = () => {
     }
     
     // Immediately set fallback data for better UX
-    setWoredas(FALLBACK_WOREDAS[verificationData.kifleKetema] || []);
+    if (FALLBACK_WOREDAS[verificationData.kifleKetema]) {
+      setWoredas(FALLBACK_WOREDAS[verificationData.kifleKetema]);
+    }
     
     const fetchWoredas = async () => {
       try {
@@ -122,11 +124,18 @@ const IdentityVerificationPage = () => {
           const woredasData = response.data.woredas || [];
           if (woredasData.length > 0) {
             setWoredas(woredasData);
+          } else {
+            // If API returns empty array, use fallback data
+            setWoredas(FALLBACK_WOREDAS[verificationData.kifleKetema] || []);
           }
+        } else {
+          // If API response is not successful, use fallback data
+          setWoredas(FALLBACK_WOREDAS[verificationData.kifleKetema] || []);
         }
       } catch (error) {
         console.error('Error fetching woredas:', error);
-        // Fallback data already set above
+        // Use fallback data on error
+        setWoredas(FALLBACK_WOREDAS[verificationData.kifleKetema] || []);
       } finally {
         setIsLoading(false);
       }
@@ -159,11 +168,18 @@ const IdentityVerificationPage = () => {
           const kebelesData = response.data.kebeles || [];
           if (kebelesData.length > 0) {
             setKebeles(kebelesData);
+          } else {
+            // If API returns empty array, use fallback data
+            setKebeles(FALLBACK_KEBELES[verificationData.kifleKetema]?.[verificationData.wereda] || []);
           }
+        } else {
+          // If API response is not successful, use fallback data
+          setKebeles(FALLBACK_KEBELES[verificationData.kifleKetema]?.[verificationData.wereda] || []);
         }
       } catch (error) {
         console.error('Error fetching kebeles:', error);
-        // Fallback data already set above
+        // Use fallback data on error
+        setKebeles(FALLBACK_KEBELES[verificationData.kifleKetema]?.[verificationData.wereda] || []);
       } finally {
         setIsLoading(false);
       }

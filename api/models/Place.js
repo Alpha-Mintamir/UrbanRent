@@ -1,6 +1,6 @@
 const { DataTypes, Model } = require('sequelize');
 const sequelize = require('../config/db');
-const PropertyOwner = require('./PropertyOwner');
+const User = require('./User');
 const Location = require('./Location');
 
 class Property extends Model {}
@@ -19,7 +19,7 @@ Property.init({
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: PropertyOwner,
+      model: User,
       key: 'user_id'
     },
     onDelete: 'CASCADE'
@@ -38,7 +38,7 @@ Property.init({
     type: DataTypes.INTEGER
   },
   location_id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING(255),
     references: {
       model: Location,
       key: 'house_no'

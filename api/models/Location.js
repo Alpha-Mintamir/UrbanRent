@@ -5,21 +5,24 @@ class Location extends Model {}
 
 Location.init({
   house_no: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
+    type: DataTypes.STRING(255),
+    primaryKey: true
   },
   sub_city: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
   woreda: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
   kebele: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING(255),
+    allowNull: false
   },
   area_name: {
-    type: DataTypes.STRING(255)
+    type: DataTypes.STRING(255),
+    allowNull: false
   }
 }, {
   sequelize,

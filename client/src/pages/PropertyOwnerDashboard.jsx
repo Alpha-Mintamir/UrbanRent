@@ -88,7 +88,7 @@ const PropertyOwnerDashboard = () => {
               </svg>
             }
             color="bg-[#D746B7]"
-            onClick={() => navigate('/account/verify-identity')}
+            onClick={() => navigate('/account/verify-location')}
           />
           
           <DashboardCard 

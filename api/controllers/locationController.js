@@ -188,9 +188,9 @@ exports.getSubCities = async (req, res) => {
       group: ['sub_city']
     });
     
-    // If no sub-cities found in the database, return default ones
-    if (subCities.length === 0) {
-      console.log('No sub-cities found in DB, returning defaults');
+    // If no sub-cities found in the database or fewer than the defaults, return default ones
+    if (subCities.length === 0 || subCities.length < DEFAULT_SUB_CITIES.length) {
+      console.log('No sub-cities found in DB or fewer than defaults, returning defaults');
       return res.status(200).json({
         success: true,
         count: DEFAULT_SUB_CITIES.length,
@@ -200,6 +200,17 @@ exports.getSubCities = async (req, res) => {
     
     const formattedSubCities = subCities.map(item => item.sub_city);
     console.log('Returning sub-cities:', formattedSubCities);
+    
+    // Check if all default sub-cities are included, if not, return defaults
+    const hasAllDefaults = DEFAULT_SUB_CITIES.every(city => formattedSubCities.includes(city));
+    if (!hasAllDefaults) {
+      console.log('Not all default sub-cities found in DB, returning defaults');
+      return res.status(200).json({
+        success: true,
+        count: DEFAULT_SUB_CITIES.length,
+        subCities: DEFAULT_SUB_CITIES
+      });
+    }
     
     res.status(200).json({
       success: true,
@@ -223,15 +234,23 @@ exports.getWoredasBySubCity = async (req, res) => {
     const { sub_city } = req.params;
     console.log(`Fetching woredas for sub-city: ${sub_city}`);
     
+    // Check if the sub_city exists in our defaults
+    if (!DEFAULT_WOREDAS[sub_city]) {
+      return res.status(404).json({
+        success: false,
+        message: `Sub-city ${sub_city} not found`
+      });
+    }
+    
     const woredas = await Location.findAll({
       attributes: ['woreda'],
       where: { sub_city },
       group: ['woreda']
     });
     
-    // If no woredas found in the database, return default ones
-    if (woredas.length === 0 && DEFAULT_WOREDAS[sub_city]) {
-      console.log(`No woredas found in DB for ${sub_city}, returning defaults`);
+    // If no woredas found in the database or fewer than defaults, return default ones
+    if (woredas.length === 0 || woredas.length < DEFAULT_WOREDAS[sub_city].length) {
+      console.log(`No woredas found in DB or fewer than defaults for ${sub_city}, returning defaults`);
       return res.status(200).json({
         success: true,
         count: DEFAULT_WOREDAS[sub_city].length,
@@ -241,6 +260,20 @@ exports.getWoredasBySubCity = async (req, res) => {
     
     const formattedWoredas = woredas.map(item => item.woreda);
     console.log('Returning woredas:', formattedWoredas);
+    
+    // Check if all default woredas are included, if not, return defaults
+    const hasAllDefaults = DEFAULT_WOREDAS[sub_city].every(woreda => 
+      formattedWoredas.includes(woreda)
+    );
+    
+    if (!hasAllDefaults) {
+      console.log(`Not all default woredas found in DB for ${sub_city}, returning defaults`);
+      return res.status(200).json({
+        success: true,
+        count: DEFAULT_WOREDAS[sub_city].length,
+        woredas: DEFAULT_WOREDAS[sub_city]
+      });
+    }
     
     res.status(200).json({
       success: true,
@@ -272,15 +305,23 @@ exports.getKebelesByWoreda = async (req, res) => {
     const { sub_city, woreda } = req.params;
     console.log(`Fetching kebeles for sub-city: ${sub_city}, woreda: ${woreda}`);
     
+    // Check if the sub_city and woreda exist in our defaults
+    if (!DEFAULT_KEBELES[sub_city] || !DEFAULT_KEBELES[sub_city][woreda]) {
+      return res.status(404).json({
+        success: false,
+        message: `Sub-city ${sub_city} or woreda ${woreda} not found`
+      });
+    }
+    
     const kebeles = await Location.findAll({
       attributes: ['kebele'],
       where: { sub_city, woreda },
       group: ['kebele']
     });
     
-    // If no kebeles found in the database, return default ones
-    if (kebeles.length === 0 && DEFAULT_KEBELES[sub_city]?.[woreda]) {
-      console.log(`No kebeles found in DB for ${sub_city}/${woreda}, returning defaults`);
+    // If no kebeles found in the database or fewer than defaults, return default ones
+    if (kebeles.length === 0 || kebeles.length < DEFAULT_KEBELES[sub_city][woreda].length) {
+      console.log(`No kebeles found in DB or fewer than defaults for ${sub_city}/${woreda}, returning defaults`);
       return res.status(200).json({
         success: true,
         count: DEFAULT_KEBELES[sub_city][woreda].length,
@@ -290,6 +331,20 @@ exports.getKebelesByWoreda = async (req, res) => {
     
     const formattedKebeles = kebeles.map(item => item.kebele);
     console.log('Returning kebeles:', formattedKebeles);
+    
+    // Check if all default kebeles are included, if not, return defaults
+    const hasAllDefaults = DEFAULT_KEBELES[sub_city][woreda].every(kebele => 
+      formattedKebeles.includes(kebele)
+    );
+    
+    if (!hasAllDefaults) {
+      console.log(`Not all default kebeles found in DB for ${sub_city}/${woreda}, returning defaults`);
+      return res.status(200).json({
+        success: true,
+        count: DEFAULT_KEBELES[sub_city][woreda].length,
+        kebeles: DEFAULT_KEBELES[sub_city][woreda]
+      });
+    }
     
     res.status(200).json({
       success: true,

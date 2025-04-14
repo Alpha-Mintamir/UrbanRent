@@ -22,7 +22,7 @@ import { PlaceProvider } from './providers/PlaceProvider';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { getItemFromLocalStorage } from './utils';
 import NotFoundPage from './pages/NotFoundPage';
-import IdentityVerificationPage from './pages/IdentityVerificationPage';
+import LocationVerificationPage from './pages/LocationVerificationPage';
 import AuthGuard from '@/components/guards/AuthGuard';
 import RoleGuard from '@/components/guards/RoleGuard';
 import Home from './pages/Home';
@@ -93,8 +93,8 @@ function App() {
                 element={<SingleBookedPlace />}
               />
               <Route
-                path="/account/verify-identity"
-                element={<IdentityVerificationPage />}
+                path="/account/verify-location"
+                element={<LocationVerificationPage />}
               />
               <Route path="*" element={<NotFoundPage />} />
             </Route>

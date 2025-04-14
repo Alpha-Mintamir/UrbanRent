@@ -9,54 +9,63 @@ import Perks from '@/components/ui/Perks';
 import PhotosUploader from '@/components/ui/PhotosUploader';
 import Spinner from '@/components/ui/Spinner';
 
+// Function to get user data from localStorage
+const getUserData = () => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) {
+    try {
+      return JSON.parse(storedUser);
+    } catch (e) {
+      console.error('Error parsing user data from localStorage:', e);
+    }
+  }
+  return null;
+};
+
 const PlacesFormPage = () => {
   const { id } = useParams();
   const [redirect, setRedirect] = useState(false);
   const [loading, setLoading] = useState(false);
   const [addedPhotos, setAddedPhotos] = useState([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [locationData, setLocationData] = useState(null);
 
   const [formData, setFormData] = useState({
-    title: '',
-    address: '',
+    property_name: '',
     description: '',
+    extra_info: '',
+    max_guests: 4,
+    price: 5000,
     perks: [],
-    extraInfo: '',
-    checkIn: '',
-    checkOut: '',
-    maxGuests: 10,
-    price: 500,
   });
 
   const {
-    title,
-    address,
+    property_name,
     description,
-    perks,
-    extraInfo,
-    checkIn,
-    checkOut,
-    maxGuests,
+    extra_info,
+    max_guests,
     price,
+    perks,
   } = formData;
 
   const isValidPlaceData = () => {
-    if (title.trim() === '') {
-      toast.error("Title can't be empty!");
-      return false;
-    } else if (address.trim() === '') {
-      toast.error("Address can't be empty!");
+    if (property_name.trim() === '') {
+      toast.error("የንብረት ስም ባዶ መሆን አይችልም!");
       return false;
     } else if (addedPhotos.length < 5) {
-      toast.error('Upload at least 5 photos!');
+      toast.error('ቢያንስ 5 ፎቶዎችን ይጫኑ! የቤቱን የተለያዩ ክፍሎች የሚያሳዩ ምስሎችን ያካትቱ።');
       return false;
     } else if (description.trim() === '') {
-      toast.error("Description can't be empty!");
+      toast.error("ማብራሪያ ባዶ መሆን አይችልም!");
       return false;
-    } else if (maxGuests < 1) {
-      toast.error('At least one guests is required!');
+    } else if (max_guests < 1) {
+      toast.error('ቢያንስ አንድ እንግዳ ያስፈልጋል!');
       return false;
-    } else if (maxGuests > 10) {
-      toast.error("Max. guests can't be greater than 10");
+    } else if (max_guests > 20) {
+      toast.error("ከፍተኛው የእንግዶች ብዛት ከ 20 መብለጥ አይችልም");
+      return false;
+    } else if (price < 500) {
+      toast.error("ዋጋው ከ 500 ብር በታች መሆን አይችልም");
       return false;
     }
 
@@ -119,29 +128,135 @@ const PlacesFormPage = () => {
     );
   };
 
-  const savePlace = async (e) => {
+  const showPropertyConfirmation = (e) => {
     e.preventDefault();
 
-    const formDataIsValid = isValidPlaceData();
-    // console.log(isValidPlaceData());
-    const placeData = { ...formData, addedPhotos };
+    // Get the current user data
+    const currentUser = getUserData();
+    
+    if (!currentUser || !currentUser.user_id) {
+      toast.error('እባክዎ በመጀመሪያ ይገቡ። የተገቢ መረጃ አልተገኘም።');
+      console.error('User not authenticated or user ID missing');
+      return;
+    }
+    
+    // Get location data from localStorage
+    let storedLocationData = null;
+    
+    try {
+      const storedData = localStorage.getItem('locationData');
+      if (storedData) {
+        storedLocationData = JSON.parse(storedData);
+        setLocationData(storedLocationData);
+        console.log('Retrieved location data from localStorage:', storedLocationData);
+      } else {
+        console.warn('No location data found in localStorage');
+      }
+    } catch (error) {
+      console.error('Error parsing location data from localStorage:', error);
+    }
+    
+    // Check if location data is available
+    if (!storedLocationData) {
+      toast.error('የአካባቢ መረጃ አልተገኘም። እባክዎ መጀመሪያ የአካባቢ መረጃዎን ያረጋግጡ።');
+      navigate('/account/verify-location');
+      return;
+    }
+    
+    // Validate form data
+    if (!isValidPlaceData()) {
+      return;
+    }
+    
+    // Show confirmation dialog
+    setShowConfirmation(true);
+  };
+  
+  const savePlace = async () => {
+    // Get the current user data
+    const currentUser = getUserData();
 
-    // Make API call only if formData is valid
-    if (formDataIsValid) {
+    // Prepare data according to the Property model structure
+    const propertyData = {
+      property_name: property_name,
+      description: description,
+      extra_info: extra_info,
+      max_guests: parseInt(max_guests),
+      price: parseFloat(price),
+      perks: perks,
+      photos: addedPhotos,
+      // Include user_id explicitly
+      user_id: currentUser.user_id,
+      // Include complete location data instead of just the ID
+      location: locationData
+    };
+
+    console.log('Sending property data with user_id and location_id:', propertyData);
+    
+    try {
+      setLoading(true);
+      
+      // Verify that all photos are valid Cloudinary URLs
+      const validPhotos = addedPhotos.every(url => 
+        url.includes('cloudinary.com') && 
+        (url.includes('/Airbnb/Places/') || url.includes('/upload/'))
+      );
+      
+      if (!validPhotos) {
+        toast.error('አንዳንድ ፎቶዎች በትክክል አልተጫኑም። እባክዎ ሁሉንም ፎቶዎች እንደገና ይጫኑ።');
+        setLoading(false);
+        return;
+      }
+        
       if (id) {
         // update existing place
         const { data } = await axiosInstance.put('/places/update-place', {
           id,
-          ...placeData,
+          ...propertyData,
         });
+        toast.success('ንብረት በተሳካ ሁኔታ ተዘምኗል!');
+        setRedirect(true);
       } else {
-        // new place
+        // new place - send both property and location data together
         const { data } = await axiosInstance.post(
           '/places/add-places',
-          placeData,
+          propertyData,
         );
+        toast.success('ንብረት በተሳካ ሁኔታ ተጨምሯል!');
+        // Clear the location data from localStorage after successful submission
+        localStorage.removeItem('locationData');
+        setRedirect(true);
       }
-      setRedirect(true);
+    } catch (error) {
+      console.error('Error saving property:', error);
+      
+      if (error.response) {
+        // The server responded with an error status
+        if (error.response.status === 400) {
+          toast.error('የተላኩት መረጃዎች ትክክል አይደሉም። እባክዎ ያረጋግጡ እና እንደገና ይሞክሩ።');
+        } else if (error.response.status === 500) {
+          toast.error('አገልጋዩ ላይ ስህተት ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።');
+        } else if (error.response.status === 403) {
+          toast.error('ይህን ንብረት ለማዘመን ፈቃድ የለዎትም።');
+        } else if (error.response.status === 404) {
+          toast.error('ንብረቱ አልተገኘም።');
+        } else {
+          toast.error(`ስህተት ተፈጥሯል፦ ${error.response.status}`);
+        }
+        
+        // Log the error details for debugging
+        if (error.response.data) {
+          console.error('Server error details:', error.response.data);
+        }
+      } else if (error.request) {
+        // No response received from the server
+        toast.error('አገልጋዩን ማግኘት አልተቻለም። እባክዎ ኔትወርክዎን ያረጋግጡ።');
+      } else {
+        // Error setting up the request
+        toast.error('አስፈላጊው ጥያቄ በመላክ ላይ ችግር ተፈጥሯል።');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -152,76 +267,189 @@ const PlacesFormPage = () => {
   if (loading) {
     return <Spinner />;
   }
+  
+  // Confirmation dialog
+  if (showConfirmation) {
+    return (
+      <div className="p-4">
+        <AccountNav />
+        <div className="mx-auto max-w-4xl rounded-lg border border-gray-300 p-6 shadow-md">
+          <h1 className="mb-6 text-center text-3xl font-bold">የንብረት መረጃ ማረጋገጣ</h1>
+          
+          <div className="mb-6">
+            <h2 className="mb-2 text-xl font-semibold">የቤት መረጃ</h2>
+            <div className="grid grid-cols-1 gap-4 rounded-lg bg-gray-50 p-4 md:grid-cols-2">
+              <div>
+                <p className="font-semibold">የቤት አይነት:</p>
+                <p>{property_name}</p>
+              </div>
+              <div>
+                <p className="font-semibold">የክፍያ ውለታ:</p>
+                <p>{price} ብር</p>
+              </div>
+              <div>
+                <p className="font-semibold">የእንግዶች ብዛት:</p>
+                <p>{max_guests}</p>
+              </div>
+              <div>
+                <p className="font-semibold">አገልግሎቶች:</p>
+                <p>{perks.length > 0 ? perks.join(', ') : 'የተመረጠ የለም'}</p>
+              </div>
+              <div className="col-span-1 md:col-span-2">
+                <p className="font-semibold">ዝርዝር መግለጣ:</p>
+                <p>{description}</p>
+              </div>
+              {extra_info && (
+                <div className="col-span-1 md:col-span-2">
+                  <p className="font-semibold">ተጨማሪ መረጃ:</p>
+                  <p>{extra_info}</p>
+                </div>
+              )}
+              <div className="col-span-1 md:col-span-2">
+                <p className="font-semibold">ፍቶጋራፊዎች:</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {addedPhotos.map((photo, index) => (
+                    <img 
+                      key={index} 
+                      src={photo} 
+                      alt="Property" 
+                      className="h-24 w-24 rounded-md object-cover"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mb-6">
+            <h2 className="mb-2 text-xl font-semibold">የአካባቢ መረጃ</h2>
+            <div className="rounded-lg bg-gray-50 p-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <p className="font-semibold">ክፍለ ከተማ:</p>
+                  <p>{locationData?.sub_city}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">ወረዳ:</p>
+                  <p>{locationData?.woreda}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">ቀበለ:</p>
+                  <p>{locationData?.kebele}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">የቤት ቁጥር:</p>
+                  <p>{locationData?.house_no}</p>
+                </div>
+                <div className="col-span-1 md:col-span-2">
+                  <p className="font-semibold">የአካባቢ ስም:</p>
+                  <p>{locationData?.area_name}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-8 flex justify-center space-x-4">
+            <button
+              onClick={() => setShowConfirmation(false)}
+              className="rounded-full border border-gray-300 bg-white px-6 py-3 font-semibold text-gray-700 transition hover:bg-gray-100"
+            >
+              አርም
+            </button>
+            <button
+              onClick={savePlace}
+              disabled={loading}
+              className="rounded-full bg-[#D746B7] px-6 py-3 font-semibold text-white transition hover:bg-[#c13da3] disabled:bg-gray-400"
+            >
+              {loading ? 'እየተለከ ነው...' : 'አረጋግጥ እና አስቀምጥ'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4">
       <AccountNav />
-      <form onSubmit={savePlace}>
+      <h1 className="mb-8 text-center text-3xl font-bold">የቤት መረጃ</h1>
+      <form onSubmit={showPropertyConfirmation} className="mx-auto max-w-4xl">
         {preInput(
-          'ቤቱ አይነት',
-          'ቤቶ ምን አይነት እንደሆነ በ አጭሩ ይግለፁ',
+          'የቤት አይነት',
+          'ቤቱ ምን አይነት እንደሆነ በአጭሩ ይግለጹ (ለምሳሌ: ኮንዶሚኒየም, አፓርትመንት, ቪላ, ወዘተ.)',
         )}
         <input
           type="text"
-          name="title"
-          value={title}
+          name="property_name"
+          value={property_name}
           onChange={handleFormData}
-          
+          placeholder="የቤት አይነት"
+          className="w-full rounded-lg border border-gray-300 p-2 focus:border-[#D746B7] focus:outline-none"
         />
 
-        {preInput('አድራሻ', 'ክፍለ ከተማ፣ ወረዳ እና ቀበሌ')}
-        <input
-          type="text"
-          name="address"
-          value={address}
-          onChange={handleFormData}
-          placeholder="አድራሻ"
-        />
-
-        {preInput('ምስል', 'ቤቶን ገፅታ የሚያሳዩ ምስሎችን ያስገቡ')}
-
+        {preInput('ምስሎች', 'የቤቱን ገጽታ የሚያሳዩ ምስሎችን ይጫኑ (ቢያንስ 5 ምስሎች - የውጭ እና የውስጥ ክፍሎችን ያካትቱ)')}
         <PhotosUploader
           addedPhotos={addedPhotos}
           setAddedPhotos={setAddedPhotos}
         />
 
-        {preInput('Description', 'ስለ ቤቶ የሚገልፅ አጠር ያለ ማብራሪያ ያስገቡ')}
+        {preInput('ዝርዝር መግለጫ', 'ስለ ቤቱ ዝርዝር መግለጫ ያስገቡ (ስፋት, ቁጥር ክፍሎች, ወዘተ.)')}
         <textarea
           value={description}
           name="description"
           onChange={handleFormData}
+          placeholder="ቤቱን በዝርዝር ይግለጹ..."
+          className="min-h-[150px] w-full rounded-lg border border-gray-300 p-2 focus:border-[#D746B7] focus:outline-none"
         />
 
-        {preInput('ስለ ቤቱ ተጨማሪ መረጃ', ' ስለ ቤቱ ተጨማሪ መረጃ ያስገቡ')}
+        {preInput('አገልግሎቶች', 'ቤቱ የሚያቀርባቸው አገልግሎቶች')}
         <Perks selected={perks} handleFormData={handleFormData} />
 
-        {preInput('ስለ ቤቱ ተጨማሪ መረጃ', 'ለተከራይ ምስፈርት ካሎት እዚህ ጋር ያስግቡ')}
+        {preInput('ተጨማሪ መረጃ', 'ለተከራዮች ማሳወቅ የሚፈልጉት ተጨማሪ መረጃ ካለ')}
         <textarea
-          value={extraInfo}
-          name="extraInfo"
+          value={extra_info}
+          name="extra_info"
           onChange={handleFormData}
+          placeholder="ተጨማሪ መረጃ ወይም ልዩ መመሪያዎች..."
+          className="min-h-[100px] w-full rounded-lg border border-gray-300 p-2 focus:border-[#D746B7] focus:outline-none"
         />
 
-        {preInput(
-          'ዋጋ',
-          
-        )}
-        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-4">
-        
+        <div className="mt-8 grid gap-6 sm:grid-cols-2">
           <div>
-            <h3 className="mt-2 -mb-1"> </h3>
+            {preInput('ከፍተኛ የእንግዶች ብዛት', 'ቤቱ ሊያስተናግድ የሚችለው ከፍተኛ የሰዎች ብዛት')}
+            <input
+              type="number"
+              name="max_guests"
+              value={max_guests}
+              onChange={handleFormData}
+              min="1"
+              max="20"
+              className="w-full rounded-lg border border-gray-300 p-2 focus:border-[#D746B7] focus:outline-none"
+            />
+          </div>
+          
+          <div>
+            {preInput('ወርሃዊ ዋጋ (ብር)', 'የቤቱ ወርሃዊ የኪራይ ዋጋ በኢትዮጵያ ብር')}
             <input
               type="number"
               name="price"
               value={price}
               onChange={handleFormData}
-              placeholder="1"
+              min="500"
+              className="w-full rounded-lg border border-gray-300 p-2 focus:border-[#D746B7] focus:outline-none"
             />
           </div>
         </div>
-        <button className="mx-auto my-4 flex rounded-full bg-[#D746B7] py-3 px-20 text-xl font-semibold text-white">
-          Save
-        </button>
+        
+        <div className="mt-10 flex justify-center">
+          <button 
+            type="submit"
+            disabled={loading}
+            className="rounded-full bg-[#D746B7] py-3 px-20 text-xl font-semibold text-white transition hover:bg-[#c13da3] disabled:bg-gray-400"
+          >
+            {loading ? 'እየተላከ ነው...' : id ? 'አዘምን' : 'አስቀምጥ'}
+          </button>
+        </div>
       </form>
     </div>
   );

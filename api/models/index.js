@@ -2,11 +2,19 @@
 const sequelize = require('../config/db');
 const User = require('./User');
 const Location = require('./Location');
+const Property = require('./Place');
+const Perk = require('./Perk');
+const Photo = require('./photo');
 
 // Define model associations here
-// For example:
-// User.hasMany(Location);
-// Location.belongsTo(User);
+User.hasMany(Property, { foreignKey: 'user_id' });
+Property.belongsTo(User, { foreignKey: 'user_id' });
+
+Property.hasMany(Perk, { foreignKey: 'property_id' });
+Perk.belongsTo(Property, { foreignKey: 'property_id' });
+
+Property.hasMany(Photo, { foreignKey: 'property_id' });
+Photo.belongsTo(Property, { foreignKey: 'property_id' });
 
 // Sync all models with the database
 const syncModels = async () => {
@@ -24,5 +32,8 @@ syncModels();
 module.exports = {
   sequelize,
   User,
-  Location
+  Location,
+  Property,
+  Perk,
+  Photo
 };
