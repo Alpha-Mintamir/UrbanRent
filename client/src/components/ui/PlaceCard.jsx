@@ -3,11 +3,15 @@ import { Link } from 'react-router-dom';
 import BrokerBadge from './BrokerBadge';
 import { useLanguage } from '@/providers/LanguageProvider';
 
-const PlaceCard = ({ place }) => {
+const PlaceCard = ({ place, isTenantView = false }) => {
   const { _id: placeId, photos, address, title, price, is_broker_listing } = place;
   const { language } = useLanguage();
+  
+  // Determine the link path based on whether it's a tenant view or owner view
+  const linkPath = isTenantView ? `/property/${placeId}` : `/place/${placeId}`;
+  
   return (
-    <Link to={`/place/${placeId}`} className="m-4 flex flex-col md:m-2 xl:m-0">
+    <Link to={linkPath} className="m-4 flex flex-col md:m-2 xl:m-0">
       <div className="card ">
         {photos?.[0] && (
           <img

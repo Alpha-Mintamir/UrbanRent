@@ -517,6 +517,128 @@ export const translations = {
   totalProperties: {
     am: 'ጠቅላላ ንብረቶች',
     en: 'Total Properties'
+  },
+  
+  // Tenant-specific translations
+  tenantDashboard: {
+    am: 'የተከራይ ዳሽቦርድ',
+    en: 'Tenant Dashboard'
+  },
+  tenant: {
+    am: 'ተከራይ',
+    en: 'Tenant'
+  },
+  savedProperties: {
+    am: 'የተቀመጡ ንብረቶች',
+    en: 'Saved Properties'
+  },
+  propertiesSaved: {
+    am: 'የተቀመጡ ንብረቶች',
+    en: 'Properties you saved'
+  },
+  activeBookings: {
+    am: 'አሁን ያሉ ቦታዎች',
+    en: 'Active Bookings'
+  },
+  currentBookings: {
+    am: 'የአሁን ቦታዎች',
+    en: 'Your current bookings'
+  },
+  viewedProperties: {
+    am: 'የተመለከቱ ንብረቶች',
+    en: 'Viewed Properties'
+  },
+  recentlyViewed: {
+    am: 'በቅርቡ የተመለከቱ',
+    en: 'Recently viewed'
+  },
+  browseProperties: {
+    am: 'ንብረቶችን ይመልከቱ',
+    en: 'Browse Properties'
+  },
+  findYourDreamHome: {
+    am: 'የህልም ቤትዎን ከሰፊው ዝርዝራችን ይፈልጉ',
+    en: 'Find your dream home from our extensive listings'
+  },
+  search: {
+    am: 'ፈልግ',
+    en: 'Search'
+  },
+  searchPlaceholder: {
+    am: 'በስም፣ መግለጫ፣ ወይም አድራሻ ይፈልጉ',
+    en: 'Search by name, description, or location'
+  },
+  minPrice: {
+    am: 'ዝቅተኛ ዋጋ (ብር)',
+    en: 'Min Price (ETB)'
+  },
+  maxPrice: {
+    am: 'ከፍተኛ ዋጋ (ብር)',
+    en: 'Max Price (ETB)'
+  },
+  amenities: {
+    am: 'አገልግሎቶች',
+    en: 'Amenities'
+  },
+  propertiesFound: {
+    am: 'ንብረቶች ተገኝተዋል',
+    en: 'Properties Found'
+  },
+  newest: {
+    am: 'አዲስ',
+    en: 'Newest'
+  },
+  priceLowToHigh: {
+    am: 'ዋጋ፡ ከዝቅተኛ ወደ ከፍተኛ',
+    en: 'Price: Low to High'
+  },
+  priceHighToLow: {
+    am: 'ዋጋ፡ ከከፍተኛ ወደ ዝቅተኛ',
+    en: 'Price: High to Low'
+  },
+  noPropertiesFound: {
+    am: 'ምንም ንብረቶች አልተገኙም',
+    en: 'No properties found'
+  },
+  tryDifferentFilters: {
+    am: 'የተለያዩ ማጣሪያዎችን ወይም የፍለጋ ቃሎችን ይሞክሩ',
+    en: 'Try adjusting your filters or search term to find more properties'
+  },
+  clearFilters: {
+    am: 'ማጣሪያዎችን አጽዳ',
+    en: 'Clear Filters'
+  },
+  backToBrowse: {
+    am: 'ወደ ፍለጋ ተመለስ',
+    en: 'Back to Browse'
+  },
+  tenantTips: {
+    am: 'የተከራይ ምክሮች',
+    en: 'Tenant Tips'
+  },
+  compareProperties: {
+    am: 'ከመወሰንዎ በፊት ብዙ ንብረቶችን ያነጻጽሩ',
+    en: 'Compare multiple properties before deciding'
+  },
+  checkAmenities: {
+    am: 'ሁሉንም አገልግሎቶች እና መገልገያዎች ይፈትሹ',
+    en: 'Check all amenities and facilities'
+  },
+  readReviews: {
+    am: 'ከቀድሞ ተከራዮች ግምገማዎችን ያንብቡ',
+    en: 'Read reviews from previous tenants'
+  },
+  verifyLocation: {
+    am: 'አካባቢውን እና አካባቢውን ያረጋግጡ',
+    en: 'Verify the location and surroundings'
+  },
+  negotiatePrice: {
+    am: 'ዋጋውን ለመደራደር አያመንቱ',
+    en: 'Don\'t hesitate to negotiate the price'
+  },
+  myBookings: {
+    am: 'የእኔ ቦታዎች',
+    en: 'My Bookings'
   }
 };
 

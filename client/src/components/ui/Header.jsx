@@ -39,6 +39,7 @@ export const Header = () => {
   // Check if the user is a property owner (role 2) or broker (role 3)
   const isPropertyOwner = user && parseInt(user.role) === 2;
   const isBroker = user && parseInt(user.role) === 3;
+  const isTenant = user && parseInt(user.role) === 1;
 
   return (
     <header
@@ -51,7 +52,7 @@ export const Header = () => {
           showSearchBar ? 'justify-around' : 'justify-between px-10'
         } w-screen max-w-screen-xl`}
       >
-        <a href={isBroker ? "/broker/dashboard" : isPropertyOwner ? "/owner/dashboard" : "/"} className="flex items-center gap-1">
+        <a href={isBroker ? "/broker/dashboard" : isPropertyOwner ? "/owner/dashboard" : isTenant ? "/tenant/dashboard" : "/"} className="flex items-center gap-1">
           <img
             className="h-8 w-8 md:h-10 md:w-10"
             src="/assets/logo.ico"
@@ -101,6 +102,41 @@ export const Header = () => {
               <span>{t('dashboard')}</span>
             </Link>
           )}
+          
+          {/* Tenant Dashboard Link */}
+          {isTenant && (
+            <Link
+              to="/tenant/dashboard"
+              className="hidden items-center gap-1 rounded-full bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700 md:flex"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              <span>{t('dashboard')}</span>
+            </Link>
+          )}
+          
+          {/* Browse Properties Link (visible to all users) */}
+          <Link
+            to="/browse"
+            className="hidden items-center gap-1 rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 md:flex"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z" />
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a4 4 0 00-3.446 6.032l-2.261 2.26a1 1 0 101.414 1.415l2.261-2.261A4 4 0 1011 5z" clipRule="evenodd" />
+            </svg>
+            <span>{t('browseProperties')}</span>
+          </Link>
 
           <Link
             to={user ? '/account' : '/login'}

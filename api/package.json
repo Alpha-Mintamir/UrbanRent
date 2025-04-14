@@ -1,16 +1,21 @@
 {
-  "name": "airbnb-api",
+  "name": "urbanrent-api",
   "version": "1.0.0",
-  "description": "API for airbnb clone app",
+  "description": "API for UrbanRent property rental platform",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "npm install",
+    "vercel-build": "echo 'Vercel build completed'"
   },
   "keywords": [
     "api",
-    "backend"
+    "backend",
+    "property",
+    "rental",
+    "urbanrent"
   ],
-  "author": "rahul4019",
+  "author": "Alpha-Mintamir",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

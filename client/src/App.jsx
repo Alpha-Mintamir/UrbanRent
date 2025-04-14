@@ -31,6 +31,10 @@ import SettingsPage from './pages/SettingsPage';
 import AuthGuard from '@/components/guards/AuthGuard';
 import RoleGuard from '@/components/guards/RoleGuard';
 import Home from './pages/Home';
+import TenantDashboard from './pages/TenantDashboard';
+import PropertyBrowsePage from './pages/PropertyBrowsePage';
+import TenantPropertyDetailPage from './pages/TenantPropertyDetailPage';
+import SavedPropertiesPage from './pages/SavedPropertiesPage';
 
 function App() {
   useEffect(() => {
@@ -190,6 +194,57 @@ function App() {
                   </AuthGuard>
                 }
               />
+              
+              {/* Tenant Routes */}
+              <Route 
+                path="/tenant/dashboard" 
+                element={
+                  <RoleGuard requiredRole={1}>
+                    <TenantDashboard />
+                  </RoleGuard>
+                } 
+              />
+              <Route 
+                path="/tenant/settings" 
+                element={
+                  <AuthGuard>
+                    <SettingsPage />
+                  </AuthGuard>
+                } 
+              />
+              <Route 
+                path="/tenant/bookings" 
+                element={
+                  <RoleGuard requiredRole={1}>
+                    <BookingsPage />
+                  </RoleGuard>
+                } 
+              />
+              <Route 
+                path="/tenant/messages" 
+                element={
+                  <RoleGuard requiredRole={1}>
+                    <MessagesPage />
+                  </RoleGuard>
+                } 
+              />
+              <Route 
+                path="/tenant/saved" 
+                element={
+                  <RoleGuard requiredRole={1}>
+                    <SavedPropertiesPage />
+                  </RoleGuard>
+                } 
+              />
+              <Route 
+                path="/browse" 
+                element={<PropertyBrowsePage />} 
+              />
+              <Route 
+                path="/property/:id" 
+                element={<TenantPropertyDetailPage />} 
+              />
+              
               <Route path="*" element={<NotFoundPage />} />
             </Route>
               </Routes>
