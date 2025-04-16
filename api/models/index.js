@@ -5,10 +5,17 @@ const Location = require('./Location');
 const Property = require('./Place');
 const Perk = require('./Perk');
 const Photo = require('./photo');
+const Review = require('./Review');
 
 // Define model associations here
 User.hasMany(Property, { foreignKey: 'user_id' });
 Property.belongsTo(User, { foreignKey: 'user_id' });
+
+// Add review associations
+Property.hasMany(Review, { foreignKey: 'property_id', as: 'reviews' });
+Review.belongsTo(Property, { foreignKey: 'property_id' });
+User.hasMany(Review, { foreignKey: 'user_id', as: 'reviews' });
+Review.belongsTo(User, { foreignKey: 'user_id' });
 
 // Add association between Property and Location
 Property.belongsTo(Location, { foreignKey: 'location_id', as: 'location' });
@@ -39,5 +46,6 @@ module.exports = {
   Location,
   Property,
   Perk,
-  Photo
+  Photo,
+  Review
 };

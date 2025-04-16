@@ -576,10 +576,6 @@ export const translations = {
     am: 'ከፍተኛ ዋጋ (ብር)',
     en: 'Max Price (ETB)'
   },
-  amenities: {
-    am: 'አገልግሎቶች',
-    en: 'Amenities'
-  },
   propertiesFound: {
     am: 'ንብረቶች ተገኝተዋል',
     en: 'Properties Found'
@@ -595,10 +591,6 @@ export const translations = {
   priceHighToLow: {
     am: 'ዋጋ፡ ከከፍተኛ ወደ ዝቅተኛ',
     en: 'Price: High to Low'
-  },
-  noPropertiesFound: {
-    am: 'ምንም ንብረቶች አልተገኙም',
-    en: 'No properties found'
   },
   tryDifferentFilters: {
     am: 'የተለያዩ ማጣሪያዎችን ወይም የፍለጋ ቃሎችን ይሞክሩ',
@@ -628,10 +620,7 @@ export const translations = {
     am: 'ከቀድሞ ተከራዮች ግምገማዎችን ያንብቡ',
     en: 'Read reviews from previous tenants'
   },
-  verifyLocation: {
-    am: 'አካባቢውን እና አካባቢውን ያረጋግጡ',
-    en: 'Verify the location and surroundings'
-  },
+
   negotiatePrice: {
     am: 'ዋጋውን ለመደራደር አያመንቱ',
     en: 'Don\'t hesitate to negotiate the price'

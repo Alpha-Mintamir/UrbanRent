@@ -5,6 +5,7 @@ const db = require("./config/db"); // Import the database connection
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary").v2;
+const errorHandler = require("./middleware/errorHandler");
 
 // Import models to ensure they're initialized
 require("./models/index");
@@ -67,13 +68,7 @@ app.get('/health', async (req, res) => {
 app.use("/", require("./routes"));
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'production' ? 'Server error' : err.message
-  });
-});
+app.use(errorHandler);
 
 // Only start the server if not in a serverless environment
 if (process.env.NODE_ENV !== 'production') {

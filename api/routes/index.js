@@ -8,7 +8,9 @@ const  upload = multer({ dest: '/tmp' });
 
 router.get('/', (req, res) => {
   res.status(200).json({
-    greeting: 'Hello from airbnb-clone api',
+    greeting: 'Welcome to UrbanRent API',
+    status: 'online',
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -55,7 +57,14 @@ router.post('/upload', upload.array('photos', 100), async (req, res) => {
 router.use('/user', require('./user'));
 router.use('/places', require('./place'));
 router.use('/locations', require('./location'));
-// Booking routes removed
-
+// Review routes
+router.use(require('./reviewRoutes'));
+// Debug routes - only available in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  router.use('/debug', require('./debug'));
+} else {
+  // Limited debug routes for production
+  router.use('/debug', require('./debug'));
+}
 
 module.exports = router;

@@ -5,6 +5,7 @@ import axiosInstance from '@/utils/axios';
 import AccountNav from '@/components/ui/AccountNav';
 import Spinner from '@/components/ui/Spinner';
 import { useLanguage } from '@/providers/LanguageProvider';
+import ReviewSection from '@/components/ui/ReviewSection';
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
@@ -212,6 +213,12 @@ const PropertyDetailPage = () => {
               <p className="whitespace-pre-line">{property.extra_info}</p>
             </div>
           )}
+        </div>
+
+        {/* --- Reviews Section --- */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Reviews & Ratings</h2>
+          <ReviewSection propertyId={property.property_id || property.id || id} />
         </div>
 
         <div className="mb-8 flex justify-between">
