@@ -1,70 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const cloudinary = require('cloudinary').v2;
-const multer = require('multer');
 
-// multer
-const  upload = multer({ dest: '/tmp' });
+// Import route handlers
+const userRoutes = require('./user');
+const placeRoutes = require('./place');
+const reviewRoutes = require('./reviewRoutes');
+const locationRoutes = require('./location');
 
-router.get('/', (req, res) => {
-  res.status(200).json({
-    greeting: 'Welcome to UrbanRent API',
-    status: 'online',
-    timestamp: new Date().toISOString()
-  });
-});
+// User routes
+router.use('/user', userRoutes);
 
-// upload photo using image url
-router.post('/upload-by-link', async (req, res) => {
-  try {
-    const { link } = req.body;
-    let result = await cloudinary.uploader.upload(link, {
-      folder: 'Airbnb/Places',
-    });
-    res.json(result.secure_url);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      message: 'Internal server error',
-    });
-  }
-});
+// Place routes
+router.use('/places', placeRoutes);
 
-// upload images from local device
-router.post('/upload', upload.array('photos', 100), async (req, res) => {
-  try {
-    let imageArray = [];
-
-    for (let index = 0; index < req.files.length; index++) {
-      let { path } = req.files[index];
-      let result = await cloudinary.uploader.upload(path, {
-        folder: 'Airbnb/Places',
-      });
-      imageArray.push(result.secure_url);
-    }
-
-    res.status(200).json(imageArray);
-  } catch (error) {
-    console.log('Error: ', error);
-    res.status(500).json({
-      error,
-      message: 'Internal server error',
-    });
-  }
-});
-
-
-router.use('/user', require('./user'));
-router.use('/places', require('./place'));
-router.use('/locations', require('./location'));
 // Review routes
-router.use(require('./reviewRoutes'));
+router.use('/reviews', reviewRoutes);
+
+// Location routes
+router.use('/locations', locationRoutes);
+
 // Debug routes - only available in non-production environments
 if (process.env.NODE_ENV !== 'production') {
-  router.use('/debug', require('./debug'));
-} else {
-  // Limited debug routes for production
-  router.use('/debug', require('./debug'));
+  router.get('/debug/places', async (req, res) => {
+    try {
+      const Place = require('../models/Place');
+      const places = await Place.findAll();
+      res.json(places);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
 }
 
 module.exports = router;

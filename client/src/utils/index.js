@@ -21,3 +21,9 @@ export const removeItemFromLocalStorage = (key) => {
   }
   localStorage.removeItem(key);
 };
+
+// Helper to check if user is logged in
+export const isUserLoggedIn = () => {
+  const token = localStorage.getItem('token');
+  return !!token;
+};

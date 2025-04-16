@@ -5,7 +5,7 @@ import axiosInstance from '@/utils/axios';
 import AccountNav from '@/components/ui/AccountNav';
 import Spinner from '@/components/ui/Spinner';
 import { useLanguage } from '@/providers/LanguageProvider';
-import ReviewSection from '@/components/ui/ReviewSection';
+import PropertyReviews from '@/components/property/PropertyReviews';
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
@@ -35,7 +35,7 @@ const PropertyDetailPage = () => {
     if (id) {
       fetchPropertyDetails();
     }
-  }, [id]);
+  }, [id, language]);
 
   if (loading) {
     return (
@@ -116,47 +116,39 @@ const PropertyDetailPage = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="min-h-screen bg-gray-50">
       <AccountNav />
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{property.property_name}</h1>
-          <button
-            onClick={() => navigate(`/account/places/${property.property_id}`)}
-            className="rounded-md bg-[#D746B7] px-4 py-2 text-white hover:bg-[#c13da3]"
-          >
-            {t('edit')}
-          </button>
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* Property Title */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">{property.title}</h1>
         </div>
 
         {/* Property Images */}
         <div className="mb-8">
-          <h2 className="mb-3 text-xl font-semibold">{language === 'am' ? 'ፎቶዎች' : 'Photos'}</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {property.photos && Array.isArray(property.photos) && property.photos.length > 0 ? (
-              property.photos.map((photo, index) => (
-                <div key={index} className="aspect-square overflow-hidden rounded-lg">
-                  <img 
-                    src={typeof photo === 'object' ? photo.url : photo} 
+          {property.photos?.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {property.photos.map((photo, index) => (
+                <div key={index} className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
+                  <img
+                    src={photo}
                     alt={`Property ${index + 1}`}
                     className="h-full w-full object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/300?text=Image+Not+Available';
-                    }}
                   />
                 </div>
-              ))
-            ) : (
-              <div className="col-span-full text-center text-gray-500">
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-48 items-center justify-center rounded-lg bg-gray-100">
+              <p className="text-gray-500">
                 {language === 'am' ? 'ምንም ፎቶዎች አልተጫኑም' : 'No photos uploaded'}
-              </div>
-            )}
-          </div>
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Property Details */}
-        <div className="mb-8 rounded-lg bg-gray-50 p-6 shadow-sm">
+        <div className="mb-8 rounded-lg bg-white p-6 shadow-lg">
           <h2 className="mb-4 text-xl font-semibold">{t('propertyDetails')}</h2>
           
           <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -172,11 +164,11 @@ const PropertyDetailPage = () => {
           </div>
           
           <div className="mb-4">
-            <h3 className="font-medium text-gray-700 mb-2">{language === 'am' ? 'አድራሻ' : 'Address'}</h3>
+            <h3 className="mb-2 font-medium text-gray-700">{language === 'am' ? 'አድራሻ' : 'Address'}</h3>
             {property.location ? (
-              <div className="bg-gray-100 rounded-lg p-4 shadow-inner">
+              <div className="rounded-lg bg-gray-50 p-4">
                 {getLocationData(property.location) ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {Object.values(getLocationData(property.location)).map((item, index) => (
                       <div key={index} className="flex flex-col">
                         <span className="text-sm text-gray-500">{item.label}</span>
@@ -185,13 +177,13 @@ const PropertyDetailPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 italic">
+                  <p className="italic text-gray-500">
                     {language === 'am' ? 'ምንም የአድራሻ መረጃ አልተመዘገበም' : 'No address information registered'}
                   </p>
                 )}
               </div>
             ) : (
-              <p className="text-gray-500 italic">
+              <p className="italic text-gray-500">
                 {language === 'am' ? 'ምንም የአድራሻ መረጃ አልተመዘገበም' : 'No address information registered'}
               </p>
             )}
@@ -215,13 +207,11 @@ const PropertyDetailPage = () => {
           )}
         </div>
 
-        {/* --- Reviews Section --- */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold mb-4">Reviews & Ratings</h2>
-          <ReviewSection propertyId={property.property_id || property.id || id} />
-        </div>
+        {/* Reviews Section */}
+        <PropertyReviews propertyId={id} />
 
-        <div className="mb-8 flex justify-between">
+        {/* Navigation Buttons */}
+        <div className="mt-8 flex justify-between">
           <Link
             to="/account/places"
             className="rounded-md bg-gray-200 px-4 py-2 text-gray-700 hover:bg-gray-300"
@@ -230,7 +220,7 @@ const PropertyDetailPage = () => {
           </Link>
           
           <button
-            onClick={() => navigate(`/account/places/${property.property_id}`)}
+            onClick={() => navigate(`/account/places/${id}`)}
             className="rounded-md bg-[#D746B7] px-4 py-2 text-white hover:bg-[#c13da3]"
           >
             {t('edit')}

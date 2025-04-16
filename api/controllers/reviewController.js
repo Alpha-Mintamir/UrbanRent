@@ -1,42 +1,23 @@
 const Review = require('../models/Review');
 const User = require('../models/User');
 
-// Add a new review
-exports.createReview = async (req, res) => {
-  try {
-    const { propertyId } = req.params;
-    const { rating, comment } = req.body;
-    const user_id = req.user.id;
-
-    if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: 'Invalid rating (1-5 required)' });
-    }
-
-    const review = await Review.create({
-      property_id: propertyId,
-      user_id,
-      rating,
-      comment,
-    });
-    res.status(201).json({ message: 'Review added', review });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to add review', error: error.message });
-  }
-};
-
-// Get all reviews for a property (with user info)
+// Get all reviews for a property
 exports.getReviewsByProperty = async (req, res) => {
   try {
     const { propertyId } = req.params;
     const reviews = await Review.findAll({
       where: { property_id: propertyId },
-      include: [{ model: User, attributes: ['user_id', 'name', 'email'] }],
+      include: [{
+        model: User,
+        as: 'User',
+        attributes: ['name', 'email']
+      }],
       order: [['created_at', 'DESC']]
     });
-    console.log('Found reviews:', reviews);
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ message: 'Failed to fetch reviews' });
   }
 };
 
@@ -44,12 +25,76 @@ exports.getReviewsByProperty = async (req, res) => {
 exports.getAverageRating = async (req, res) => {
   try {
     const { propertyId } = req.params;
-    const result = await Review.findAll({
+    const result = await Review.findOne({
       where: { property_id: propertyId },
-      attributes: [[Review.sequelize.fn('AVG', Review.sequelize.col('rating')), 'avgRating']]
+      attributes: [
+        [Review.sequelize.fn('AVG', Review.sequelize.col('rating')), 'avgRating'],
+        [Review.sequelize.fn('COUNT', Review.sequelize.col('review_id')), 'totalReviews']
+      ]
     });
-    res.json({ avgRating: Number(result[0]?.dataValues.avgRating || 0).toFixed(2) });
+
+    res.json({
+      avgRating: Number(result?.dataValues.avgRating || 0).toFixed(1),
+      totalReviews: Number(result?.dataValues.totalReviews || 0)
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch average rating', error: error.message });
+    console.error('Error calculating average rating:', error);
+    res.status(500).json({ message: 'Failed to calculate average rating' });
+  }
+};
+
+// Create a new review
+exports.createReview = async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+    const { rating, comment } = req.body;
+    const userId = req.user.id;
+    
+    console.log('User attempting to create review:', req.user);
+    
+    // Check if user is a tenant (role === 1)
+    if (req.user.role !== 1) {
+      return res.status(403).json({ message: 'Only tenants can submit property reviews' });
+    }
+
+    // Validate input
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+
+    // Check if user has already reviewed this property
+    const existingReview = await Review.findOne({
+      where: {
+        property_id: propertyId,
+        user_id: userId
+      }
+    });
+
+    if (existingReview) {
+      return res.status(400).json({ message: 'You have already reviewed this property' });
+    }
+
+    // Create the review
+    const review = await Review.create({
+      property_id: propertyId,
+      user_id: userId,
+      rating,
+      comment: comment || null // Make comment optional
+    });
+
+    // Fetch the created review with user details
+    const reviewWithUser = await Review.findOne({
+      where: { review_id: review.review_id },
+      include: [{
+        model: User,
+        as: 'User',
+        attributes: ['name', 'email']
+      }]
+    });
+
+    res.status(201).json(reviewWithUser);
+  } catch (error) {
+    console.error('Error creating review:', error);
+    res.status(500).json({ message: 'Failed to create review' });
   }
 };

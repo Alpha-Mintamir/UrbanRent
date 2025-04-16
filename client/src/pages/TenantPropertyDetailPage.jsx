@@ -5,6 +5,9 @@ import axiosInstance from '@/utils/axios';
 import Spinner from '@/components/ui/Spinner';
 import { useLanguage } from '@/providers/LanguageProvider';
 import BrokerBadge from '@/components/ui/BrokerBadge';
+import PropertyReviews from '@/components/property/PropertyReviews';
+import UserRoleDebug from '@/components/debug/UserRoleDebug';
+import AuthTest from '@/components/debug/AuthTest';
 
 const TenantPropertyDetailPage = () => {
   const { id } = useParams();
@@ -483,6 +486,15 @@ const TenantPropertyDetailPage = () => {
             </div>
           </div>
         </div>
+        
+        {/* Property Reviews Section */}
+        {!loading && !error && property && (
+          <PropertyReviews propertyId={id} />
+        )}
+        
+        {/* Debug components - remove in production */}
+        <UserRoleDebug />
+        <AuthTest />
       </div>
     </div>
   );

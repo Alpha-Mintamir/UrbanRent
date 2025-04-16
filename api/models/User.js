@@ -16,9 +16,18 @@ class User extends Model {
 
   // Generate JWT
   getJwtToken() {
-    return jwt.sign({ id: this.user_id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRY || '1h',
-    });
+    return jwt.sign(
+      { 
+        id: this.user_id,
+        email: this.email,
+        role: this.role,
+        name: this.name
+      }, 
+      process.env.JWT_SECRET, 
+      {
+        expiresIn: process.env.JWT_EXPIRY || '1h',
+      }
+    );
   }
 }
 
