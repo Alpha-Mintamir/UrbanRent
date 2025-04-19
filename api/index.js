@@ -72,11 +72,11 @@ app.use(errorHandler);
 
 // Only start the server if not in a serverless environment
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(process.env.PORT || 8000, (err) => {
+  app.listen(process.env.PORT || 4000, (err) => {
     if (err) {
       console.log("Error in connecting to server: ", err);
     }
-    console.log(`Server is running on port no. ${process.env.PORT || 8000}`);
+    console.log(`Server is running on port no. ${process.env.PORT || 4000}`);
   });
 }
 
