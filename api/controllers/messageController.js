@@ -74,6 +74,21 @@ exports.getMessages = async (req, res) => {
     const { conversationId } = req.params;
     const userId = req.user.user_id;
 
+    // Verify user is part of the conversation
+    const isParticipant = await Message.findOne({
+      where: {
+        conversation_id: conversationId,
+        [Op.or]: [
+          { sender_id: userId },
+          { receiver_id: userId }
+        ]
+      }
+    });
+
+    if (!isParticipant) {
+      return res.status(403).json({ message: 'Not authorized to view this conversation' });
+    }
+
     const messages = await Message.findAll({
       where: { conversation_id: conversationId },
       order: [['created_at', 'ASC']],
@@ -111,6 +126,21 @@ exports.sendMessage = async (req, res) => {
     const { conversation_id, receiver_id, property_id, content } = req.body;
     const sender_id = req.user.user_id;
 
+    // Verify the conversation exists and user is part of it
+    const existingMessage = await Message.findOne({
+      where: {
+        conversation_id,
+        [Op.or]: [
+          { sender_id: sender_id },
+          { receiver_id: sender_id }
+        ]
+      }
+    });
+
+    if (!existingMessage) {
+      return res.status(403).json({ message: 'Not authorized to send message in this conversation' });
+    }
+
     const message = await Message.create({
       conversation_id,
       sender_id,
@@ -141,6 +171,38 @@ exports.startConversation = async (req, res) => {
   try {
     const { receiver_id, property_id, content } = req.body;
     const sender_id = req.user.user_id;
+
+    // Verify sender is a tenant
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ 
+        message: 'Only tenants can initiate new conversations' 
+      });
+    }
+
+    // Verify receiver exists and is a property owner or broker
+    const receiver = await User.findByPk(receiver_id);
+    if (!receiver || !['owner', 'broker'].includes(receiver.role)) {
+      return res.status(400).json({ 
+        message: 'Invalid receiver. Must be a property owner or broker' 
+      });
+    }
+
+    // Verify property exists and belongs to receiver
+    const property = await Property.findOne({
+      where: {
+        property_id,
+        [Op.or]: [
+          { owner_id: receiver_id },
+          { broker_id: receiver_id }
+        ]
+      }
+    });
+
+    if (!property) {
+      return res.status(400).json({ 
+        message: 'Invalid property. Must belong to the receiver' 
+      });
+    }
 
     // Create a new message with a new conversation_id
     const message = await Message.create({

@@ -10,6 +10,16 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
+  // Don't show button if user is not logged in or is not a tenant
+  if (!user || user.role !== 'tenant') {
+    return null;
+  }
+
+  // Don't show button if the user is trying to message themselves
+  if (user.user_id === ownerId) {
+    return null;
+  }
+
   const handleMessageClick = async () => {
     if (!user) {
       navigate('/login');

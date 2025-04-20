@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 const db = require("./config/db"); // Import the database connection
 const cookieSession = require("cookie-session");
 const cookieParser = require("cookie-parser");
@@ -37,6 +38,9 @@ app.use(
 // Middleware to handle JSON requests
 app.use(express.json());
 
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // CORS middleware with more permissive settings for serverless
 app.use(
   cors({
@@ -66,6 +70,9 @@ app.get('/health', async (req, res) => {
 
 // Use express router
 app.use("/", require("./routes"));
+
+// Use upload routes
+app.use("/", require("./routes/uploadRoutes"));
 
 // Error handling middleware
 app.use(errorHandler);
