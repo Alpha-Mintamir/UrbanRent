@@ -9,18 +9,33 @@ const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect property owners to their dashboard
+  // Redirect logged-in users to their respective dashboards
   useEffect(() => {
     if (user) {
       const userRole = parseInt(user.role);
-      console.log("Home - User Role:", userRole, typeof userRole);
+      console.log("Home - User Role:", userRole);
       
-      if (userRole === 2) {
-        console.log("Redirecting property owner to dashboard");
-        navigate('/owner/dashboard');
+      // Redirect based on user role
+      switch (userRole) {
+        case 1: // Tenant
+          navigate('/browse');
+          break;
+        case 2: // Property Owner
+          navigate('/owner/dashboard');
+          break;
+        case 3: // Broker
+          navigate('/broker/dashboard');
+          break;
+        default:
+          console.log("Unknown user role:", userRole);
       }
     }
   }, [user, navigate]);
+
+  // If user is logged in, don't render the landing page content
+  if (user) {
+    return null; // Return nothing while redirecting
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen">

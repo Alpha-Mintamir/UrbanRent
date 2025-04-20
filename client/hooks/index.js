@@ -17,74 +17,80 @@ export const useProvideAuth = () => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const storedUser = getItemFromLocalStorage('user');
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            // Ensure role is stored as a number
-            if (parsedUser.role) {
-                parsedUser.role = parseInt(parsedUser.role);
+        const initializeAuth = async () => {
+            const storedUser = getItemFromLocalStorage('user');
+            const token = getItemFromLocalStorage('token');
+            
+            if (storedUser && token) {
+                try {
+                    // Verify token is still valid
+                    const decoded = jwt_decode(token);
+                    const currentTime = Date.now() / 1000;
+                    
+                    if (decoded.exp < currentTime) {
+                        // Token expired
+                        removeItemFromLocalStorage('user');
+                        removeItemFromLocalStorage('token');
+                        setUser(null);
+                    } else {
+                        // Token valid, set user
+                        const parsedUser = JSON.parse(storedUser);
+                        if (parsedUser.role) {
+                            parsedUser.role = parseInt(parsedUser.role);
+                        }
+                        setUser(parsedUser);
+                        // Set token in axios defaults
+                        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    }
+                } catch (error) {
+                    // Invalid token
+                    removeItemFromLocalStorage('user');
+                    removeItemFromLocalStorage('token');
+                    setUser(null);
+                }
             }
-            setUser(parsedUser);
-        }
-        setLoading(false)
+            setLoading(false);
+        };
+
+        initializeAuth();
     }, [])
 
     const register = async (formData) => {
-        const { name, email, password, phone, role } = formData;
-        
-        console.log('Sending registration data:', { 
-            name, 
-            email, 
-            password: password ? '********' : undefined,
-            phone,
-            role
-        });
-        
         try {
-            const { data } = await axiosInstance.post('user/register', {
-                name,
-                email,
-                password,
-                phone,
-                role
-            });
+            const { data } = await axiosInstance.post('user/register', formData);
             if (data.user && data.token) {
-                setUser(data.user)
-                // save user and token in local storage
-                setItemsInLocalStorage('user', data.user)
-                setItemsInLocalStorage('token', data.token)
+                setUser(data.user);
+                setItemsInLocalStorage('user', data.user);
+                setItemsInLocalStorage('token', data.token);
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
-            return { success: true, message: 'Registration successful' }
+            return { success: true, message: 'Registration successful' };
         } catch (error) {
-            console.error('Registration error:', error.response?.data || error.message);
-            const message = error.response?.data?.message || 'Registration failed. Please try again.';
-            return { success: false, message }
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'Registration failed. Please try again.' 
+            };
         }
     }
 
     const login = async (formData) => {
-        const { email, password } = formData;
-
         try {
-            const { data } = await axiosInstance.post('user/login', {
-                email,
-                password
-            });
+            const { data } = await axiosInstance.post('user/login', formData);
             if (data.user && data.token) {
-                // Ensure role is stored as a number
                 if (data.user.role) {
                     data.user.role = parseInt(data.user.role);
                 }
-                setUser(data.user)
-                // save user and token in local storage
-                setItemsInLocalStorage('user', data.user)
-                setItemsInLocalStorage('token', data.token)
+                setUser(data.user);
+                setItemsInLocalStorage('user', data.user);
+                setItemsInLocalStorage('token', data.token);
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
-            return { success: true, message: 'Login successful' }
+            return { success: true, message: 'Login successful' };
         } catch (error) {
-            console.error('Login error:', error.response?.data || error.message);
-            const message = error.response?.data?.message || 'Login failed. Please try again.';
-            return { success: false, message }
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'Login failed. Please try again.' 
+            };
         }
     }
 
@@ -96,37 +102,33 @@ export const useProvideAuth = () => {
                 email: decoded.email
             });
             if (data.user && data.token) {
-                // Ensure role is stored as a number
                 if (data.user.role) {
                     data.user.role = parseInt(data.user.role);
                 }
-                setUser(data.user)
-                // save user and token in local storage
-                setItemsInLocalStorage('user', data.user)
-                setItemsInLocalStorage('token', data.token)
+                setUser(data.user);
+                setItemsInLocalStorage('user', data.user);
+                setItemsInLocalStorage('token', data.token);
+                axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
             }
-            return { success: true, message: 'Login successful' }
+            return { success: true, message: 'Login successful' };
         } catch (error) {
-            console.error('Google login error:', error.response?.data || error.message);
-            const message = error.response?.data?.message || 'Login failed. Please try again.';
-            return { success: false, message }
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'Login failed. Please try again.' 
+            };
         }
     }
 
     const logout = async () => {
         try {
-            const { data } = await axiosInstance.get('/user/logout');
-            if (data.success) {
-                setUser(null);
-
-                // Clear user data and token from localStorage when logging out
-                removeItemFromLocalStorage('user');
-                removeItemFromLocalStorage('token');
-            }
-            return { success: true, message: 'Logout successful' }
+            await axiosInstance.get('/user/logout');
+            setUser(null);
+            removeItemFromLocalStorage('user');
+            removeItemFromLocalStorage('token');
+            delete axiosInstance.defaults.headers.common['Authorization'];
+            return { success: true, message: 'Logout successful' };
         } catch (error) {
-            console.log(error)
-            return { success: false, message: 'Something went wrong!' }
+            return { success: false, message: 'Something went wrong!' };
         }
     }
 

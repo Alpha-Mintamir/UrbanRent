@@ -56,202 +56,257 @@ function App() {
             <PlaceProvider>
               <Routes>
                 <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="/index" element={<IndexPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/account" element={<ProfilePage />} />
-              
-              {/* Property Owner Dashboard */}
-              <Route 
-                path="/owner/dashboard" 
-                element={
-                  <RoleGuard requiredRole={2}>
-                    <PropertyOwnerDashboard />
-                  </RoleGuard>
-                } 
-              />
-              
-              {/* Broker Dashboard */}
-              <Route 
-                path="/broker/dashboard" 
-                element={
-                  <RoleGuard requiredRole={3}>
-                    <BrokerDashboard />
-                  </RoleGuard>
-                } 
-              />
-              
-              {/* Property Owner Reviews */}
-              <Route 
-                path="/account/reviews" 
-                element={
-                  <RoleGuard requiredRole={2}>
-                    <ReviewsPage />
-                  </RoleGuard>
-                } 
-              />
-              
-              {/* Broker Reviews */}
-              <Route 
-                path="/broker/reviews" 
-                element={
-                  <RoleGuard requiredRole={3}>
-                    <ReviewsPage />
-                  </RoleGuard>
-                } 
-              />
-              
-              {/* Property Owner Messages */}
-              <Route 
-                path="/account/messages" 
-                element={
-                  <RoleGuard requiredRole={2}>
-                    <MessagesPage />
-                  </RoleGuard>
-                } 
-              />
-              
-              {/* Broker Messages */}
-              <Route 
-                path="/broker/messages" 
-                element={
-                  <RoleGuard requiredRole={3}>
-                    <MessagesPage />
-                  </RoleGuard>
-                } 
-              />
-              
-              {/* Property Owner Places */}
-              <Route path="/account/places" element={<PlacesPage />} />
-              <Route path="/account/places/new" element={<PlacesFormPage />} />
-              <Route path="/account/places/:id" element={<PlacesFormPage />} />
-              
-              {/* Broker Places */}
-              <Route path="/broker/places" element={<PlacesPage />} />
-              <Route path="/broker/places/new" element={<PlacesFormPage />} />
-              <Route path="/broker/places/:id" element={<PlacesFormPage />} />
-              
-              {/* Broker Deals and Clients */}
-              <Route 
-                path="/broker/deals" 
-                element={
-                  <RoleGuard requiredRole={3}>
-                    <BrokerDashboard />
-                  </RoleGuard>
-                } 
-              />
-              <Route 
-                path="/broker/clients" 
-                element={
-                  <RoleGuard requiredRole={3}>
-                    <BrokerDashboard />
-                  </RoleGuard>
-                } 
-              />
-              
-              <Route 
-                path="/property/detail/:id" 
-                element={
-                  <AuthGuard>
-                    <PropertyDetailPage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/place/:id" 
-                element={
-                  <AuthGuard>
-                    <PlacePage />
-                  </AuthGuard>
-                } 
-              />
-              <Route path="/account/bookings" element={<BookingsPage />} />
-              <Route
-                path="/account/bookings/:id"
-                element={<SingleBookedPlace />}
-              />
-              {/* Property Owner Location Verification */}
-              <Route
-                path="/account/verify-location"
-                element={<LocationVerificationPage />}
-              />
-              
-              {/* Broker Location Verification */}
-              <Route
-                path="/broker/verify-location"
-                element={<LocationVerificationPage />}
-              />
-              <Route
-                path="/account/settings"
-                element={
-                  <AuthGuard>
-                    <SettingsPage />
-                  </AuthGuard>
-                }
-              />
-              {/* Broker Settings */}
-              <Route
-                path="/broker/settings"
-                element={
-                  <AuthGuard>
-                    <SettingsPage />
-                  </AuthGuard>
-                }
-              />
-              
-              {/* Tenant Routes */}
-              <Route 
-                path="/tenant/dashboard" 
-                element={
-                  <RoleGuard requiredRole={1}>
-                    <TenantDashboard />
-                  </RoleGuard>
-                } 
-              />
-              <Route 
-                path="/tenant/settings" 
-                element={
-                  <AuthGuard>
-                    <SettingsPage />
-                  </AuthGuard>
-                } 
-              />
-              <Route 
-                path="/tenant/bookings" 
-                element={
-                  <RoleGuard requiredRole={1}>
-                    <BookingsPage />
-                  </RoleGuard>
-                } 
-              />
-              <Route 
-                path="/tenant/messages" 
-                element={
-                  <RoleGuard requiredRole={1}>
-                    <MessagesPage />
-                  </RoleGuard>
-                } 
-              />
-              <Route 
-                path="/tenant/saved" 
-                element={
-                  <RoleGuard requiredRole={1}>
-                    <SavedPropertiesPage />
-                  </RoleGuard>
-                } 
-              />
-              <Route 
-                path="/browse" 
-                element={<PropertyBrowsePage />} 
-              />
-              <Route 
-                path="/property/:id" 
-                element={<TenantPropertyDetailPage />} 
-              />
-              
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
+                  {/* Public Routes */}
+                  <Route index element={<Home />} />
+                  <Route path="/index" element={<IndexPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  
+                  {/* Protected Routes */}
+                  <Route 
+                    path="/browse" 
+                    element={
+                      <RoleGuard requiredRole={1}>
+                        <PropertyBrowsePage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/account" 
+                    element={
+                      <AuthGuard>
+                        <ProfilePage />
+                      </AuthGuard>
+                    } 
+                  />
+                  
+                  {/* Property Owner Routes */}
+                  <Route 
+                    path="/owner/dashboard" 
+                    element={
+                      <RoleGuard requiredRole={2}>
+                        <PropertyOwnerDashboard />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Broker Routes */}
+                  <Route 
+                    path="/broker/dashboard" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <BrokerDashboard />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Property Owner Reviews */}
+                  <Route 
+                    path="/account/reviews" 
+                    element={
+                      <RoleGuard requiredRole={2}>
+                        <ReviewsPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Broker Reviews */}
+                  <Route 
+                    path="/broker/reviews" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <ReviewsPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Property Owner Messages */}
+                  <Route 
+                    path="/account/messages" 
+                    element={
+                      <RoleGuard requiredRole={2}>
+                        <MessagesPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Broker Messages */}
+                  <Route 
+                    path="/broker/messages" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <MessagesPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Property Owner Places */}
+                  <Route 
+                    path="/account/places" 
+                    element={
+                      <RoleGuard requiredRole={2}>
+                        <PlacesPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/account/places/new" 
+                    element={
+                      <RoleGuard requiredRole={2}>
+                        <PlacesFormPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/account/places/:id" 
+                    element={
+                      <RoleGuard requiredRole={2}>
+                        <PlacesFormPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Broker Places */}
+                  <Route 
+                    path="/broker/places" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <PlacesPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/broker/places/new" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <PlacesFormPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/broker/places/:id" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <PlacesFormPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Broker Deals and Clients */}
+                  <Route 
+                    path="/broker/deals" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <BrokerDashboard />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/broker/clients" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <BrokerDashboard />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Property Detail Routes */}
+                  <Route 
+                    path="/property/:id" 
+                    element={
+                      <AuthGuard>
+                        <TenantPropertyDetailPage />
+                      </AuthGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/property/detail/:id" 
+                    element={
+                      <AuthGuard>
+                        <PropertyDetailPage />
+                      </AuthGuard>
+                    } 
+                  />
+                  
+                  {/* Account Routes */}
+                  <Route 
+                    path="/account/bookings" 
+                    element={
+                      <AuthGuard>
+                        <BookingsPage />
+                      </AuthGuard>
+                    } 
+                  />
+                  <Route
+                    path="/account/bookings/:id"
+                    element={
+                      <AuthGuard>
+                        <SingleBookedPlace />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route
+                    path="/account/verify-location"
+                    element={
+                      <AuthGuard>
+                        <LocationVerificationPage />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route
+                    path="/account/settings"
+                    element={
+                      <AuthGuard>
+                        <SettingsPage />
+                      </AuthGuard>
+                    }
+                  />
+                  
+                  {/* Tenant Routes */}
+                  <Route 
+                    path="/tenant/dashboard" 
+                    element={
+                      <RoleGuard requiredRole={1}>
+                        <TenantDashboard />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/tenant/settings" 
+                    element={
+                      <AuthGuard>
+                        <SettingsPage />
+                      </AuthGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/tenant/bookings" 
+                    element={
+                      <RoleGuard requiredRole={1}>
+                        <BookingsPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/tenant/messages" 
+                    element={
+                      <RoleGuard requiredRole={1}>
+                        <MessagesPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/tenant/saved" 
+                    element={
+                      <RoleGuard requiredRole={1}>
+                        <SavedPropertiesPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  
+                  {/* Catch-all Route */}
+                  <Route path="*" element={<NotFoundPage />} />
+                </Route>
               </Routes>
               <ToastContainer autoClose={2000} transition={Slide} />
             </PlaceProvider>

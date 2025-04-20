@@ -52,7 +52,7 @@ export const Header = () => {
           showSearchBar ? 'justify-around' : 'justify-between px-10'
         } w-screen max-w-screen-xl`}
       >
-        <a href={isBroker ? "/broker/dashboard" : isPropertyOwner ? "/owner/dashboard" : isTenant ? "/tenant/dashboard" : "/"} className="flex items-center gap-1">
+        <Link to={isBroker ? "/broker/dashboard" : isPropertyOwner ? "/owner/dashboard" : isTenant ? "/browse" : "/"} className="flex items-center gap-1">
           <img
             className="h-8 w-8 md:h-10 md:w-10"
             src="/assets/logo.ico"
@@ -62,7 +62,7 @@ export const Header = () => {
           <span className="hidden text-2xl font-bold text-[#D746B7] md:block">
             Urban Rent
           </span>
-        </a>
+        </Link>
 
         {showSearchBar && <SearchBar />}
 
@@ -121,21 +121,23 @@ export const Header = () => {
             </Link>
           )}
           
-          {/* Browse Properties Link (visible to all users) */}
-          <Link
-            to="/browse"
-            className="hidden items-center gap-1 rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 md:flex"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+          {/* Browse Properties Link (visible only to tenants) */}
+          {isTenant && (
+            <Link
+              to="/browse"
+              className="hidden items-center gap-1 rounded-full bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 md:flex"
             >
-              <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z M9 17a7 7 0 100-14 7 7 0 000 14z" />
-            </svg>
-            <span>{t('browseProperties')}</span>
-          </Link>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M9 9a2 2 0 114 0 2 2 0 01-4 0z M9 17a7 7 0 100-14 7 7 0 000 14z" />
+              </svg>
+              <span>{t('browseProperties')}</span>
+            </Link>
+          )}
 
           <Link
             to={user ? '/account' : '/login'}

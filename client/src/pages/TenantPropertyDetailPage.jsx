@@ -491,10 +491,6 @@ const TenantPropertyDetailPage = () => {
         {!loading && !error && property && (
           <PropertyReviews propertyId={id} />
         )}
-        
-        {/* Debug components - remove in production */}
-        <UserRoleDebug />
-        <AuthTest />
       </div>
     </div>
   );

@@ -1,41 +1,73 @@
 // config/db.js
 const { Sequelize } = require('sequelize');
 
-// Create a connection pool that can be reused between serverless function invocations
-let sequelize;
+class Database {
+  constructor() {
+    if (!Database.instance) {
+      this.sequelize = new Sequelize(process.env.DATABASE_URL, {
+        dialect: 'postgres',
+        dialectOptions: {
+          ssl: {
+            require: true,
+            rejectUnauthorized: process.env.NODE_ENV === 'production' // Only disable in development
+          }
+        },
+        pool: {
+          max: process.env.NODE_ENV === 'production' ? 2 : 5,
+          min: 0,
+          idle: 10000,
+          acquire: 30000,
+          // Add connection retry on failure
+          retry: {
+            match: [
+              /SequelizeConnectionError/,
+              /SequelizeConnectionRefusedError/,
+              /SequelizeHostNotFoundError/,
+              /SequelizeHostNotReachableError/,
+              /SequelizeInvalidConnectionError/,
+              /SequelizeConnectionTimedOutError/,
+              /TimeoutError/
+            ],
+            max: 3
+          }
+        },
+        logging: process.env.NODE_ENV !== 'production' ? console.log : false
+      });
 
-if (!sequelize) {
-  sequelize = new Sequelize(process.env.DATABASE_URL, {
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false
+      Database.instance = this;
+    }
+
+    return Database.instance;
+  }
+
+  async testConnection(retries = 3, delay = 5000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        await this.sequelize.authenticate();
+        console.log('PostgreSQL DB connected successfully via Sequelize');
+        return true;
+      } catch (err) {
+        console.error(`DB connection attempt ${attempt} failed:`, err.message);
+        
+        if (attempt === retries) {
+          console.error('Max retries reached. Could not establish database connection');
+          return false;
+        }
+
+        // Wait before next retry
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-    },
-    pool: {
-      max: 2, // Reduce connection pool size for serverless
-      min: 0,
-      idle: 10000,
-      acquire: 30000
-    },
-    logging: false
-  });
-}
-
-// Don't automatically authenticate on import in serverless environment
-// This will be done when needed instead
-const testConnection = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('PostgreSQL DB connected successfully via Sequelize');
-    return true;
-  } catch (err) {
-    console.error('DB connection failed');
-    console.error(err);
+    }
     return false;
   }
-};
 
-module.exports = sequelize;
-module.exports.testConnection = testConnection;
+  getInstance() {
+    return this.sequelize;
+  }
+}
+
+// Create a singleton instance
+const database = new Database();
+
+module.exports = database.getInstance();
+module.exports.testConnection = database.testConnection.bind(database);
