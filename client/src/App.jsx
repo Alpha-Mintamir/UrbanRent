@@ -35,6 +35,8 @@ import TenantDashboard from './pages/TenantDashboard';
 import PropertyBrowsePage from './pages/PropertyBrowsePage';
 import TenantPropertyDetailPage from './pages/TenantPropertyDetailPage';
 import SavedPropertiesPage from './pages/SavedPropertiesPage';
+import CombinedPropertyPage from './pages/CombinedPropertyPage';
+import PropertyFormWithLocation from './pages/PropertyFormWithLocation';
 
 function App() {
   useEffect(() => {
@@ -144,24 +146,66 @@ function App() {
                   <Route 
                     path="/account/places" 
                     element={
-                      <RoleGuard requiredRole={2}>
+                      <AuthGuard>
                         <PlacesPage />
-                      </RoleGuard>
+                      </AuthGuard>
                     } 
                   />
                   <Route 
                     path="/account/places/new" 
                     element={
-                      <RoleGuard requiredRole={2}>
+                      <AuthGuard>
                         <PlacesFormPage />
-                      </RoleGuard>
+                      </AuthGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/account/places/edit/:id" 
+                    element={
+                      <AuthGuard>
+                        <PlacesFormPage />
+                      </AuthGuard>
                     } 
                   />
                   <Route 
                     path="/account/places/:id" 
                     element={
-                      <RoleGuard requiredRole={2}>
-                        <PlacesFormPage />
+                      <AuthGuard>
+                        <PlacePage />
+                      </AuthGuard>
+                    } 
+                  />
+                  
+                  {/* New Combined Property Page */}
+                  <Route 
+                    path="/account/properties" 
+                    element={
+                      <AuthGuard>
+                        <CombinedPropertyPage />
+                      </AuthGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/account/properties/:id" 
+                    element={
+                      <AuthGuard>
+                        <CombinedPropertyPage />
+                      </AuthGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/broker/properties" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <CombinedPropertyPage />
+                      </RoleGuard>
+                    } 
+                  />
+                  <Route 
+                    path="/broker/properties/:id" 
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <CombinedPropertyPage />
                       </RoleGuard>
                     } 
                   />
@@ -259,6 +303,40 @@ function App() {
                       <AuthGuard>
                         <SettingsPage />
                       </AuthGuard>
+                    }
+                  />
+                  
+                  {/* New Combined Property Form with Location */}
+                  <Route 
+                    path="/account/property/new"
+                    element={
+                      <AuthGuard>
+                        <PropertyFormWithLocation />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route 
+                    path="/account/property/edit/:id"
+                    element={
+                      <AuthGuard>
+                        <PropertyFormWithLocation />
+                      </AuthGuard>
+                    }
+                  />
+                  <Route 
+                    path="/broker/property/new"
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <PropertyFormWithLocation />
+                      </RoleGuard>
+                    }
+                  />
+                  <Route 
+                    path="/broker/property/edit/:id"
+                    element={
+                      <RoleGuard requiredRole={3}>
+                        <PropertyFormWithLocation />
+                      </RoleGuard>
                     }
                   />
                   

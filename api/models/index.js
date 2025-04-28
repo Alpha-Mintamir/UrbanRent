@@ -6,6 +6,7 @@ const Property = require('./Place');
 const Perk = require('./Perk');
 const Photo = require('./photo');
 const Review = require('./Review');
+const Message = require('./Message');
 
 // Define model associations here
 User.hasMany(Property, { foreignKey: 'user_id' });
@@ -27,6 +28,11 @@ Perk.belongsTo(Property, { foreignKey: 'property_id' });
 Property.hasMany(Photo, { foreignKey: 'property_id', as: 'photos' });
 Photo.belongsTo(Property, { foreignKey: 'property_id' });
 
+// Message associations
+User.hasMany(Message, { foreignKey: 'sender_id', as: 'sentMessages' });
+User.hasMany(Message, { foreignKey: 'receiver_id', as: 'receivedMessages' });
+Property.hasMany(Message, { foreignKey: 'property_id', as: 'messages' });
+
 // Sync all models with the database
 const syncModels = async () => {
   try {
@@ -47,5 +53,6 @@ module.exports = {
   Property,
   Perk,
   Photo,
-  Review
+  Review,
+  Message
 };

@@ -5,42 +5,59 @@ import axiosInstance from '../../utils/axios';
 
 const PhotosUploader = ({ addedPhotos, setAddedPhotos }) => {
   const [photoLink, setphotoLink] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const addPhotoByLink = async (e) => {
     e.preventDefault();
-    const { data: filename } = await axiosInstance.post('/upload-by-link', {
-      link: photoLink,
-    });
-    setAddedPhotos((prev) => {
-      return [...prev, filename];
-    });
-    setphotoLink('');
+    try {
+      setUploading(true);
+      const { data: imageUrl } = await axiosInstance.post('/upload-by-link', {
+        link: photoLink,
+      });
+      setAddedPhotos((prev) => {
+        return [...prev, imageUrl];
+      });
+      setphotoLink('');
+    } catch (error) {
+      console.error('Error uploading image by link:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const uploadPhoto = async (e) => {
     const files = e.target.files;
-    const data = new FormData(); // creating new form data
+    const data = new FormData(); 
     for (let i = 0; i < files.length; i++) {
-      data.append('photos', files[i]); // adding all the photos to data one by one
+      data.append('photos', files[i]); 
     }
-    const { data: filenames } = await axiosInstance.post('/upload', data, {
-      headers: { 'Content-type': 'multipart/form-data' },
-    });
-    setAddedPhotos((prev) => {
-      return [...prev, ...filenames];
-    });
+    try {
+      setUploading(true);
+      const { data: imageUrls } = await axiosInstance.post('/upload', data, {
+        headers: { 'Content-type': 'multipart/form-data' },
+      });
+      setAddedPhotos((prev) => {
+        return [...prev, ...imageUrls];
+      });
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('Failed to upload images. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const removePhoto = (filename) => {
-    setAddedPhotos([...addedPhotos.filter((photo) => photo !== filename)]);
+  const removePhoto = (imageUrl) => {
+    setAddedPhotos([...addedPhotos.filter((photo) => photo !== imageUrl)]);
   };
 
-  const selectAsMainPhoto = (e, filename) => {
+  const selectAsMainPhoto = (e, imageUrl) => {
     e.preventDefault();
 
     setAddedPhotos([
-      filename,
-      ...addedPhotos.filter((photo) => photo !== filename),
+      imageUrl,
+      ...addedPhotos.filter((photo) => photo !== imageUrl),
     ]);
   };
 
@@ -52,26 +69,29 @@ const PhotosUploader = ({ addedPhotos, setAddedPhotos }) => {
           onChange={(e) => setphotoLink(e.target.value)}
           type="text"
           placeholder="Add using a link ...jpg"
+          disabled={uploading}
         />
         <button
-          className="rounded-2xl bg-gray-200 px-4"
+          className="rounded-2xl bg-gray-200 px-4 disabled:opacity-50"
           onClick={addPhotoByLink}
+          disabled={uploading || !photoLink}
         >
-          Add&nbsp;photo
+          {uploading ? 'Uploading...' : 'Add photo'}
         </button>
       </div>
       <div className="mt-2 grid grid-cols-3 gap-2 md:grid-cols-4 lg:grid-cols-6 ">
         {addedPhotos?.length > 0 &&
-          addedPhotos.map((link) => (
-            <div className="relative flex h-32" key={link}>
+          addedPhotos.map((imageUrl) => (
+            <div className="relative flex h-32" key={imageUrl}>
               <Image
                 className="w-full rounded-2xl object-cover"
-                src={link}
+                src={imageUrl}
                 alt=""
               />
               <button
-                onClick={() => removePhoto(link)}
+                onClick={() => removePhoto(imageUrl)}
                 className="absolute bottom-1 right-1 cursor-pointer rounded-full bg-black bg-opacity-50 p-1 text-white hover:bg-opacity-70"
+                disabled={uploading}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -89,10 +109,11 @@ const PhotosUploader = ({ addedPhotos, setAddedPhotos }) => {
                 </svg>
               </button>
               <button
-                onClick={(e) => selectAsMainPhoto(e, link)}
+                onClick={(e) => selectAsMainPhoto(e, imageUrl)}
                 className="absolute bottom-1 left-1 cursor-pointer rounded-full bg-black bg-opacity-50 p-1 text-white hover:bg-opacity-70"
+                disabled={uploading}
               >
-                {link === addedPhotos[0] && (
+                {imageUrl === addedPhotos[0] && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -107,7 +128,7 @@ const PhotosUploader = ({ addedPhotos, setAddedPhotos }) => {
                   </svg>
                 )}
 
-                {link !== addedPhotos[0] && (
+                {imageUrl !== addedPhotos[0] && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -132,6 +153,7 @@ const PhotosUploader = ({ addedPhotos, setAddedPhotos }) => {
             multiple
             className="hidden"
             onChange={uploadPhoto}
+            disabled={uploading}
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -147,7 +169,7 @@ const PhotosUploader = ({ addedPhotos, setAddedPhotos }) => {
               d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"
             />
           </svg>
-          Upload
+          {uploading ? 'Uploading...' : 'Upload'}
         </label>
       </div>
     </>

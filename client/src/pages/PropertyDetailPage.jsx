@@ -128,15 +128,32 @@ const PropertyDetailPage = () => {
         <div className="mb-8">
           {property.photos?.length > 0 ? (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {property.photos.map((photo, index) => (
-                <div key={index} className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
-                  <img
-                    src={photo}
-                    alt={`Property ${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ))}
+              {property.photos.map((photo, index) => {
+                // Handle different photo object formats
+                const photoUrl = typeof photo === 'string' 
+                  ? photo 
+                  : photo.url || photo.photo_url || '';
+                
+                // Determine if this is a Cloudinary URL or a local path
+                const imageUrl = photoUrl.startsWith('http') 
+                  ? photoUrl 
+                  : `${import.meta.env.VITE_BASE_URL}${photoUrl}`;
+                
+                return (
+                  <div key={index} className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
+                    <img
+                      src={imageUrl}
+                      alt={`Property ${index + 1}`}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        console.error('Image failed to load:', imageUrl);
+                        e.target.src = '/placeholder-house.png'; // Fallback image
+                        e.target.className = 'h-full w-full object-contain p-4 opacity-50';
+                      }}
+                    />
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="flex h-48 items-center justify-center rounded-lg bg-gray-100">
