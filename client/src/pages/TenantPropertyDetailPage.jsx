@@ -94,7 +94,7 @@ const TenantPropertyDetailPage = () => {
     }
     
     return perks.map(perk => 
-      typeof perk === 'object' ? perk.name : perk
+      typeof perk === 'object' ? (perk.perk || perk.name || '') : perk
     ).join(', ');
   };
 
@@ -142,15 +142,40 @@ const TenantPropertyDetailPage = () => {
             {/* Property Images */}
             <div className="mb-8">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {property.photos?.map((photo, index) => (
-                  <div key={index} className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
-                    <img
-                      src={photo}
-                      alt={`Property ${index + 1}`}
-                      className="h-full w-full object-cover"
-                    />
+                {property.photos && Array.isArray(property.photos) && property.photos.length > 0 ? (
+                  property.photos.map((photo, index) => {
+                    // Handle different photo object formats
+                    const photoUrl = typeof photo === 'string' 
+                      ? photo 
+                      : photo.url || photo.photo_url || '';
+                    
+                    // Determine if this is a Cloudinary URL or a local path
+                    const imageUrl = photoUrl.startsWith('http') 
+                      ? photoUrl 
+                      : `${import.meta.env.VITE_BASE_URL}${photoUrl}`;
+                    
+                    return (
+                      <div key={index} className="aspect-w-16 aspect-h-9 overflow-hidden rounded-lg">
+                        <img
+                          src={imageUrl}
+                          alt={`Property ${index + 1}`}
+                          className="h-full w-full object-cover"
+                          onError={(e) => {
+                            console.error('Image failed to load:', imageUrl);
+                            e.target.src = '/placeholder-house.png'; // Fallback image
+                            e.target.className = 'h-full w-full object-contain p-4 opacity-50';
+                          }}
+                        />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-full flex h-48 items-center justify-center rounded-lg bg-gray-100">
+                    <p className="text-gray-500">
+                      {language === 'am' ? 'ምንም ፎቶዎች አልተጫኑም' : 'No photos uploaded'}
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -162,26 +187,37 @@ const TenantPropertyDetailPage = () => {
 
             {/* Amenities */}
             <div className="mb-8">
-              <h2 className="mb-4 text-2xl font-bold">{t('amenities')}</h2>
+              <h2 className="mb-4 text-2xl font-bold">{t('amenities') || 'Amenities'}</h2>
               <div className="grid grid-cols-2 gap-4">
-                {property.perks?.map((perk, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <svg
-                      className="h-5 w-5 text-green-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                    <span>{perk}</span>
+                {property.perks && Array.isArray(property.perks) ? property.perks.map((perk, index) => {
+                  // Extract the perk name based on the data structure
+                  const perkName = typeof perk === 'object' 
+                    ? (perk.perk || perk.name || 'Amenity') 
+                    : perk;
+                  
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <svg
+                        className="h-5 w-5 text-green-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      <span>{perkName}</span>
+                    </div>
+                  );
+                }) : (
+                  <div className="col-span-2 text-gray-500">
+                    {language === 'am' ? 'ምንም አገልግሎቶች አልተመዘገቡም' : 'No amenities registered'}
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -197,15 +233,15 @@ const TenantPropertyDetailPage = () => {
                 <span className="text-3xl font-bold text-primary">
                   ETB {property.price}
                 </span>
-                <span className="text-gray-600">/{t('month')}</span>
+                <span className="text-gray-600">/{language === 'am' ? 'ወር' : 'month'}</span>
               </div>
 
               {/* Contact Owner/Broker */}
               <div className="space-y-4">
                 <MessageButton
                   propertyId={property.property_id}
-                  ownerId={property.owner_id}
-                  ownerName={property.owner_name}
+                  ownerId={property.user_id} // Using user_id instead of owner_id
+                  ownerName={property.owner_name || 'Property Owner'}
                 />
 
                 <button
@@ -226,7 +262,7 @@ const TenantPropertyDetailPage = () => {
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  {t('saveProperty')}
+                  {language === 'am' ? 'ንብረቱን አስቀምጥ' : 'Save Property'}
                 </button>
               </div>
 
@@ -235,11 +271,11 @@ const TenantPropertyDetailPage = () => {
                 <h3 className="mb-4 text-lg font-semibold">{t('propertyDetails')}</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">{t('propertyType')}</span>
-                    <span className="font-medium">{property.property_type}</span>
+                    <span className="text-gray-600">{language === 'am' ? 'የንብረት አይነት' : 'Property Type'}</span>
+                    <span className="font-medium">{property.property_type || 'Residential'}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">{t('maxGuests')}</span>
+                    <span className="text-gray-600">{language === 'am' ? 'ከፍተኛ የእንግዶች ብዛት' : 'Max Guests'}</span>
                     <span className="font-medium">{property.max_guests}</span>
                   </div>
                   {property.broker_id && (

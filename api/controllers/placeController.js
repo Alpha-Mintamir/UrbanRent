@@ -98,14 +98,19 @@ exports.addPlace = async (req, res) => {
         // Generate a unique house_no by combining user_id and timestamp
         const uniqueHouseNo = `${user_id}_${Date.now()}`;
         
-        // Create a new location entry for the property
-        const newLocation = await Location.create({
-          sub_city: location.sub_city,
-          woreda: location.woreda,
+        // Map the frontend location field names to the database field names
+        const locationData = {
+          sub_city: location.kifleKetema || location.sub_city,
+          woreda: location.wereda || location.wereda,
           kebele: location.kebele,
-          house_no: uniqueHouseNo,  // Use the generated unique ID
-          area_name: location.area_name
-        });
+          house_no: uniqueHouseNo,
+          area_name: location.areaName || location.area_name
+        };
+        
+        console.log('Creating location with data:', locationData);
+        
+        // Create a new location entry for the property
+        const newLocation = await Location.create(locationData);
         
         console.log('Location created successfully:', newLocation.toJSON());
         locationId = uniqueHouseNo;  // Use the house_no as the locationId

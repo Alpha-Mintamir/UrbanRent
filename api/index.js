@@ -74,6 +74,9 @@ app.use("/", require("./routes"));
 // Use upload routes
 app.use("/", require("./routes/uploadRoutes"));
 
+// Use static routes for serving uploaded files
+app.use("/", require("./routes/staticRoutes"));
+
 // Error handling middleware
 app.use(errorHandler);
 
