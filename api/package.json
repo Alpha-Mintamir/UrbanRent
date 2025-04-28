@@ -1,0 +1,38 @@
+{
+  "name": "urbanrent-api",
+  "version": "1.0.0",
+  "description": "API for UrbanRent property rental platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "build": "npm install",
+    "vercel-build": "echo 'Vercel build completed'"
+  },
+  "keywords": [
+    "api",
+    "backend",
+    "property",
+    "rental",
+    "urbanrent"
+  ],
+  "author": "Alpha-Mintamir",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.35.0",
+    "cookie-parser": "^1.4.6",
+    "cookie-session": "^2.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "image-downloader": "^4.3.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^8.13.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "pg": "^8.14.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7",
+    "uuid": "^11.1.0"
+  }
+}
