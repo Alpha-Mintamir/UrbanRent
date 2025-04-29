@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -37,6 +37,49 @@ import TenantPropertyDetailPage from './pages/TenantPropertyDetailPage';
 import SavedPropertiesPage from './pages/SavedPropertiesPage';
 import CombinedPropertyPage from './pages/CombinedPropertyPage';
 import PropertyFormWithLocation from './pages/PropertyFormWithLocation';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+
+// Admin route component that checks if user is admin and redirects accordingly
+const AdminRoute = ({ children }) => {
+  const adminUser = localStorage.getItem('adminUser');
+  
+  if (!adminUser) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  
+  try {
+    const userData = JSON.parse(adminUser);
+    if (userData.role !== 4) {
+      return <Navigate to="/admin/login" replace />;
+    }
+    return children;
+  } catch (error) {
+    localStorage.removeItem('adminUser');
+    return <Navigate to="/admin/login" replace />;
+  }
+};
+
+// Check if user is admin
+const isAdmin = () => {
+  const adminUser = localStorage.getItem('adminUser');
+  if (!adminUser) return false;
+  
+  try {
+    const userData = JSON.parse(adminUser);
+    return userData.role === 4;
+  } catch (error) {
+    return false;
+  }
+};
+
+// Root route component that redirects based on user role
+const RootRoute = () => {
+  if (isAdmin()) {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return <Home />;
+};
 
 function App() {
   useEffect(() => {
@@ -57,9 +100,24 @@ function App() {
           <UserProvider>
             <PlaceProvider>
               <Routes>
+                {/* Admin Routes - Outside of Layout */}
+                <Route path="/admin">
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="login" element={<AdminLogin />} />
+                  <Route 
+                    path="dashboard/*" 
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    } 
+                  />
+                </Route>
+                
+                {/* Main Layout Routes */}
                 <Route path="/" element={<Layout />}>
                   {/* Public Routes */}
-                  <Route index element={<Home />} />
+                  <Route index element={<RootRoute />} />
                   <Route path="/index" element={<IndexPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
@@ -102,47 +160,6 @@ function App() {
                     } 
                   />
                   
-                  {/* Property Owner Reviews */}
-                  <Route 
-                    path="/account/reviews" 
-                    element={
-                      <RoleGuard requiredRole={2}>
-                        <ReviewsPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  
-                  {/* Broker Reviews */}
-                  <Route 
-                    path="/broker/reviews" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <ReviewsPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  
-                  {/* Property Owner Messages */}
-                  <Route 
-                    path="/account/messages" 
-                    element={
-                      <RoleGuard requiredRole={2}>
-                        <MessagesPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  
-                  {/* Broker Messages */}
-                  <Route 
-                    path="/broker/messages" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <MessagesPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  
-                  {/* Property Owner Places */}
                   <Route 
                     path="/account/places" 
                     element={
@@ -160,119 +177,29 @@ function App() {
                     } 
                   />
                   <Route 
-                    path="/account/places/edit/:id" 
-                    element={
-                      <AuthGuard>
-                        <PlacesFormPage />
-                      </AuthGuard>
-                    } 
-                  />
-                  <Route 
                     path="/account/places/:id" 
                     element={
                       <AuthGuard>
-                        <PlacePage />
-                      </AuthGuard>
-                    } 
-                  />
-                  
-                  {/* New Combined Property Page */}
-                  <Route 
-                    path="/account/properties" 
-                    element={
-                      <AuthGuard>
-                        <CombinedPropertyPage />
-                      </AuthGuard>
-                    } 
-                  />
-                  <Route 
-                    path="/account/properties/:id" 
-                    element={
-                      <AuthGuard>
-                        <CombinedPropertyPage />
-                      </AuthGuard>
-                    } 
-                  />
-                  <Route 
-                    path="/broker/properties" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <CombinedPropertyPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  <Route 
-                    path="/broker/properties/:id" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <CombinedPropertyPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  
-                  {/* Broker Places */}
-                  <Route 
-                    path="/broker/places" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <PlacesPage />
-                      </RoleGuard>
-                    } 
-                  />
-                  <Route 
-                    path="/broker/places/new" 
-                    element={
-                      <RoleGuard requiredRole={3}>
                         <PlacesFormPage />
-                      </RoleGuard>
+                      </AuthGuard>
                     } 
                   />
                   <Route 
-                    path="/broker/places/:id" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <PlacesFormPage />
-                      </RoleGuard>
-                    } 
+                    path="/place/:id" 
+                    element={<PlacePage />} 
                   />
-                  
-                  {/* Broker Deals and Clients */}
-                  <Route 
-                    path="/broker/deals" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <BrokerDashboard />
-                      </RoleGuard>
-                    } 
-                  />
-                  <Route 
-                    path="/broker/clients" 
-                    element={
-                      <RoleGuard requiredRole={3}>
-                        <BrokerDashboard />
-                      </RoleGuard>
-                    } 
-                  />
-                  
-                  {/* Property Detail Routes */}
                   <Route 
                     path="/property/:id" 
-                    element={
-                      <AuthGuard>
-                        <TenantPropertyDetailPage />
-                      </AuthGuard>
-                    } 
+                    element={<PropertyDetailPage />} 
                   />
                   <Route 
-                    path="/property/detail/:id" 
+                    path="/tenant/property/:id" 
                     element={
-                      <AuthGuard>
-                        <PropertyDetailPage />
-                      </AuthGuard>
+                      <RoleGuard requiredRole={1}>
+                        <TenantPropertyDetailPage />
+                      </RoleGuard>
                     } 
                   />
-                  
-                  {/* Account Routes */}
                   <Route 
                     path="/account/bookings" 
                     element={

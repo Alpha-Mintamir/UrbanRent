@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "build": "npm install",
-    "vercel-build": "echo 'Vercel build completed'"
+    "vercel-build": "echo 'Vercel build completed'",
+    "create-admin": "node scripts/createAdmin.js"
   },
   "keywords": [
     "api",

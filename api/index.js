@@ -41,6 +41,9 @@ app.use(express.json());
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // CORS middleware with more permissive settings for serverless
 app.use(
   cors({
@@ -82,11 +85,13 @@ app.use(errorHandler);
 
 // Only start the server if not in a serverless environment
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(process.env.PORT || 4000, (err) => {
+  // Use port 3001 to avoid conflicts with other common ports
+  const PORT = 3001;
+  app.listen(PORT, (err) => {
     if (err) {
       console.log("Error in connecting to server: ", err);
     }
-    console.log(`Server is running on port no. ${process.env.PORT || 4000}`);
+    console.log(`Server is running on port no. ${PORT}`);
   });
 }
 
