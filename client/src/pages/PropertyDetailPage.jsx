@@ -6,11 +6,14 @@ import AccountNav from '@/components/ui/AccountNav';
 import Spinner from '@/components/ui/Spinner';
 import { useLanguage } from '@/providers/LanguageProvider';
 import PropertyReviews from '@/components/property/PropertyReviews';
+import PropertyMessagePanel from '@/components/messaging/PropertyMessagePanel';
+import { useAuth } from '@/hooks';
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -209,6 +212,20 @@ const PropertyDetailPage = () => {
 
         {/* Reviews Section */}
         <PropertyReviews propertyId={id} />
+
+        {/* Messaging Panel - Only shown to tenants who are not the owner */}
+        {user && 
+         user.role === 'tenant' && 
+         property.user_id && 
+         user.user_id !== property.user_id && (
+          <div className="mb-8">
+            <PropertyMessagePanel
+              propertyId={property.property_id || id}
+              ownerId={property.user_id}
+              ownerName={property.owner_name || 'Property Owner'}
+            />
+          </div>
+        )}
 
         {/* Navigation Buttons */}
         <div className="mt-8 flex justify-between">

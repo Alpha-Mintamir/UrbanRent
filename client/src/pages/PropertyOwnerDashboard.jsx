@@ -133,7 +133,7 @@ const PropertyOwnerDashboard = () => {
               </svg>
             }
             color="bg-[#D746B7]"
-            onClick={() => navigate('/account/messages')}
+            onClick={() => navigate('/messages')}
           />
         </div>
 

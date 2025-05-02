@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const uploadController = require('../controllers/uploadController');
-const { isLoggedIn } = require('../middleware/auth');
+const { isLoggedIn } = require('../middleware/authMiddleware');
 
 // Route for uploading photos
 router.post('/upload', isLoggedIn, uploadController.uploadPhotos);

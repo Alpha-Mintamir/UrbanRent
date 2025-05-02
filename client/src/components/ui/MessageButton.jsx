@@ -1,22 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import { useLanguage } from '@/providers/LanguageProvider';
 import axiosInstance from '@/utils/axios';
+import { toast } from 'react-toastify';
 
 const MessageButton = ({ propertyId, ownerId, ownerName }) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [shouldRender, setShouldRender] = useState(true);
 
-  // Don't show button if user is not logged in or is not a tenant
-  if (!user || user.role !== 'tenant') {
-    return null;
-  }
+  useEffect(() => {
+    console.log('MessageButton props:', { propertyId, ownerId, ownerName });
+    console.log('Current user:', user);
 
-  // Don't show button if the user is trying to message themselves
-  if (user.user_id === ownerId) {
+    // Check if we should render the button
+    if (!user) {
+      console.log('Not rendering MessageButton: User not logged in');
+      setShouldRender(false);
+      return;
+    }
+
+    // Check if user is a tenant (role 1)
+    if (user.role !== 'tenant' && user.role !== 1) {
+      console.log('Not rendering MessageButton: User is not a tenant', user.role);
+      setShouldRender(false);
+      return;
+    }
+
+    // Check if user is trying to message themselves
+    if (user.user_id === ownerId) {
+      console.log('Not rendering MessageButton: User is trying to message themselves');
+      setShouldRender(false);
+      return;
+    }
+
+    // Check if ownerId is valid
+    if (!ownerId) {
+      console.log('Not rendering MessageButton: Owner ID is missing');
+      setShouldRender(false);
+      return;
+    }
+
+    setShouldRender(true);
+  }, [user, ownerId, propertyId]);
+
+  // Don't render if conditions aren't met
+  if (!shouldRender) {
     return null;
   }
 
@@ -28,20 +60,35 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
 
     setIsLoading(true);
     try {
-      // Start a new conversation
-      const response = await axiosInstance.post('/messages/start', {
-        receiver_id: ownerId,
-        property_id: propertyId,
-        content: t('initialMessage', { propertyOwner: ownerName })
-      });
+      // First check if a conversation already exists
+      const conversationsResponse = await axiosInstance.get('/messages/conversations');
+      const existingConversation = conversationsResponse.data.find(
+        conv => conv.property_id === propertyId && 
+               (conv.other_user.user_id === ownerId || 
+                (conv.receiver_id === ownerId && conv.sender_id === user.user_id))
+      );
 
-      // Navigate to messages page with the new conversation selected
-      navigate('/tenant/messages', {
-        state: { conversationId: response.data.conversation_id }
-      });
+      if (existingConversation) {
+        // If conversation exists, navigate to it
+        navigate('/tenant/messages', {
+          state: { conversationId: existingConversation.conversation_id }
+        });
+      } else {
+        // Start a new conversation
+        const response = await axiosInstance.post('/messages/start', {
+          receiver_id: ownerId,
+          property_id: propertyId,
+          content: t('initialMessage', { propertyOwner: ownerName }) || `Hi, I'm interested in your property.`
+        });
+
+        // Navigate to messages page with the new conversation selected
+        navigate('/tenant/messages', {
+          state: { conversationId: response.data.conversation_id }
+        });
+      }
     } catch (error) {
-      console.error('Error starting conversation:', error);
-      // You might want to show a toast notification here
+      console.error('Error with messaging:', error);
+      toast.error(t('errorStartingConversation') || 'Error starting conversation. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -70,4 +117,4 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
   );
 };
 
-export default MessageButton; 
+export default MessageButton;

@@ -6,10 +6,16 @@ const Property = require('./Place');
 const Perk = require('./Perk');
 const Photo = require('./photo');
 const Review = require('./Review');
+const Message = require('./Message');
 
 // Define model associations here
 User.hasMany(Property, { foreignKey: 'user_id' });
 Property.belongsTo(User, { foreignKey: 'user_id' });
+
+// Message associations
+User.hasMany(Message, { foreignKey: 'sender_id', as: 'sentMessages' });
+User.hasMany(Message, { foreignKey: 'receiver_id', as: 'receivedMessages' });
+Property.hasMany(Message, { foreignKey: 'property_id' });
 
 // Add review associations
 Property.hasMany(Review, { foreignKey: 'property_id', as: 'reviews' });
@@ -47,5 +53,6 @@ module.exports = {
   Property,
   Perk,
   Photo,
-  Review
+  Review,
+  Message
 };

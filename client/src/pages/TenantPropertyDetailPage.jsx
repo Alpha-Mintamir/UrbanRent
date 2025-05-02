@@ -6,7 +6,7 @@ import Spinner from '@/components/ui/Spinner';
 import { useLanguage } from '@/providers/LanguageProvider';
 import BrokerBadge from '@/components/ui/BrokerBadge';
 import PropertyReviews from '@/components/property/PropertyReviews';
-import MessageButton from '@/components/ui/MessageButton';
+import PropertyMessagePanel from '@/components/messaging/PropertyMessagePanel';
 import { useAuth } from '@/hooks';
 
 const TenantPropertyDetailPage = () => {
@@ -25,6 +25,10 @@ const TenantPropertyDetailPage = () => {
         setLoading(true);
         const { data } = await axiosInstance.get(`/places/single-place/${id}`);
         console.log('Fetched property details:', data);
+        console.log('Owner ID:', data.owner_id);
+        console.log('Owner Name:', data.owner_name);
+        console.log('User ID:', data.user_id);
+        console.log('User data:', data.User);
         setProperty(data);
       } catch (error) {
         console.error('Error fetching property details:', error);
@@ -93,9 +97,12 @@ const TenantPropertyDetailPage = () => {
       return language === 'am' ? 'ምንም አገልግሎቶች አልተመዘገቡም' : 'No amenities registered';
     }
     
-    return perks.map(perk => 
-      typeof perk === 'object' ? perk.name : perk
-    ).join(', ');
+    return perks.map(perk => {
+      if (typeof perk === 'object') {
+        return perk.perk || perk.name || '';
+      }
+      return perk;
+    }).join(', ');
   };
 
   // Get location data for display
@@ -179,7 +186,7 @@ const TenantPropertyDetailPage = () => {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    <span>{perk}</span>
+                    <span>{typeof perk === 'object' ? (perk.perk || '') : perk}</span>
                   </div>
                 ))}
               </div>
@@ -200,14 +207,8 @@ const TenantPropertyDetailPage = () => {
                 <span className="text-gray-600">/{t('month')}</span>
               </div>
 
-              {/* Contact Owner/Broker */}
-              <div className="space-y-4">
-                <MessageButton
-                  propertyId={property.property_id}
-                  ownerId={property.owner_id}
-                  ownerName={property.owner_name}
-                />
-
+              {/* Save Property Button */}
+              <div className="mb-6">
                 <button
                   onClick={handleSaveProperty}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary bg-white py-3 text-primary transition-colors hover:bg-primary hover:text-white"
@@ -229,6 +230,13 @@ const TenantPropertyDetailPage = () => {
                   {t('saveProperty')}
                 </button>
               </div>
+              
+              {/* Property Message Panel */}
+              <PropertyMessagePanel
+                propertyId={property.property_id}
+                ownerId={property.user_id}
+                ownerName={'Property Owner'}
+              />
 
               {/* Property Details */}
               <div className="mt-6 border-t pt-6">
