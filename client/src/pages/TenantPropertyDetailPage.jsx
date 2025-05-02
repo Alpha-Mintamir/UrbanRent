@@ -6,7 +6,7 @@ import Spinner from '@/components/ui/Spinner';
 import { useLanguage } from '@/providers/LanguageProvider';
 import BrokerBadge from '@/components/ui/BrokerBadge';
 import PropertyReviews from '@/components/property/PropertyReviews';
-import MessageButton from '@/components/ui/MessageButton';
+import PropertyMessagePanel from '@/components/messaging/PropertyMessagePanel';
 import { useAuth } from '@/hooks';
 
 const TenantPropertyDetailPage = () => {
@@ -25,6 +25,10 @@ const TenantPropertyDetailPage = () => {
         setLoading(true);
         const { data } = await axiosInstance.get(`/places/single-place/${id}`);
         console.log('Fetched property details:', data);
+        console.log('Owner ID:', data.owner_id);
+        console.log('Owner Name:', data.owner_name);
+        console.log('User ID:', data.user_id);
+        console.log('User data:', data.User);
         setProperty(data);
       } catch (error) {
         console.error('Error fetching property details:', error);
@@ -93,9 +97,18 @@ const TenantPropertyDetailPage = () => {
       return language === 'am' ? 'ምንም አገልግሎቶች አልተመዘገቡም' : 'No amenities registered';
     }
     
+<<<<<<< HEAD
     return perks.map(perk => 
       typeof perk === 'object' ? (perk.perk || perk.name || '') : perk
     ).join(', ');
+=======
+    return perks.map(perk => {
+      if (typeof perk === 'object') {
+        return perk.perk || perk.name || '';
+      }
+      return perk;
+    }).join(', ');
+>>>>>>> message-fix
   };
 
   // Get location data for display
@@ -189,6 +202,7 @@ const TenantPropertyDetailPage = () => {
             <div className="mb-8">
               <h2 className="mb-4 text-2xl font-bold">{t('amenities') || 'Amenities'}</h2>
               <div className="grid grid-cols-2 gap-4">
+<<<<<<< HEAD
                 {property.perks && Array.isArray(property.perks) ? property.perks.map((perk, index) => {
                   // Extract the perk name based on the data structure
                   const perkName = typeof perk === 'object' 
@@ -216,6 +230,24 @@ const TenantPropertyDetailPage = () => {
                 }) : (
                   <div className="col-span-2 text-gray-500">
                     {language === 'am' ? 'ምንም አገልግሎቶች አልተመዘገቡም' : 'No amenities registered'}
+=======
+                {property.perks?.map((perk, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <svg
+                      className="h-5 w-5 text-green-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    <span>{typeof perk === 'object' ? (perk.perk || '') : perk}</span>
+>>>>>>> message-fix
                   </div>
                 )}
               </div>
@@ -236,6 +268,7 @@ const TenantPropertyDetailPage = () => {
                 <span className="text-gray-600">/{language === 'am' ? 'ወር' : 'month'}</span>
               </div>
 
+<<<<<<< HEAD
               {/* Contact Owner/Broker */}
               <div className="space-y-4">
                 <MessageButton
@@ -244,6 +277,10 @@ const TenantPropertyDetailPage = () => {
                   ownerName={property.owner_name || 'Property Owner'}
                 />
 
+=======
+              {/* Save Property Button */}
+              <div className="mb-6">
+>>>>>>> message-fix
                 <button
                   onClick={handleSaveProperty}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-primary bg-white py-3 text-primary transition-colors hover:bg-primary hover:text-white"
@@ -265,6 +302,13 @@ const TenantPropertyDetailPage = () => {
                   {language === 'am' ? 'ንብረቱን አስቀምጥ' : 'Save Property'}
                 </button>
               </div>
+              
+              {/* Property Message Panel */}
+              <PropertyMessagePanel
+                propertyId={property.property_id}
+                ownerId={property.user_id}
+                ownerName={'Property Owner'}
+              />
 
               {/* Property Details */}
               <div className="mt-6 border-t pt-6">

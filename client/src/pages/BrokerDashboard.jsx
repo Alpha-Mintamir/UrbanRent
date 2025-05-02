@@ -138,7 +138,7 @@ const BrokerDashboard = () => {
               </svg>
             }
             color="bg-blue-600"
-            onClick={() => navigate('/broker/messages')}
+            onClick={() => navigate('/messages')}
           />
         </div>
 

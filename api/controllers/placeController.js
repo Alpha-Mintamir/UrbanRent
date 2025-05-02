@@ -383,6 +383,11 @@ exports.singlePlace = async (req, res) => {
           model: require('../models/photo'),
           as: 'photos',
           required: false
+        },
+        {
+          model: require('../models/User'),
+          attributes: ['user_id', 'name', 'picture', 'role'],
+          required: false
         }
       ]
     });
@@ -394,8 +399,13 @@ exports.singlePlace = async (req, res) => {
       });
     }
     
+    // Add owner information needed for MessageButton
+    const placeData = place.toJSON();
+    placeData.owner_id = placeData.user_id;
+    placeData.owner_name = placeData.User ? placeData.User.name : '';
+    
     console.log(`Found place with ID ${id}`);
-    res.status(200).json(place);
+    res.status(200).json(placeData);
   } catch (err) {
     console.error('Error fetching single place:', err);
     res.status(500).json({
@@ -429,6 +439,11 @@ exports.singlePlaceById = async (req, res) => {
           model: require('../models/photo'),
           as: 'photos',
           required: false
+        },
+        {
+          model: require('../models/User'),
+          attributes: ['user_id', 'name', 'picture', 'role'],
+          required: false
         }
       ]
     });
@@ -440,8 +455,13 @@ exports.singlePlaceById = async (req, res) => {
       });
     }
     
+    // Add owner information needed for MessageButton
+    const placeData = place.toJSON();
+    placeData.owner_id = placeData.user_id;
+    placeData.owner_name = placeData.User ? placeData.User.name : '';
+    
     console.log(`Found place with property_id ${id}`);
-    res.status(200).json(place);
+    res.status(200).json(placeData);
   } catch (err) {
     console.error('Error fetching single place by id:', err);
     res.status(500).json({

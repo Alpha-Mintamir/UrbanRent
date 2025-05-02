@@ -12,6 +12,11 @@ const Message = require('./Message');
 User.hasMany(Property, { foreignKey: 'user_id' });
 Property.belongsTo(User, { foreignKey: 'user_id' });
 
+// Message associations
+User.hasMany(Message, { foreignKey: 'sender_id', as: 'sentMessages' });
+User.hasMany(Message, { foreignKey: 'receiver_id', as: 'receivedMessages' });
+Property.hasMany(Message, { foreignKey: 'property_id' });
+
 // Add review associations
 Property.hasMany(Review, { foreignKey: 'property_id', as: 'reviews' });
 Review.belongsTo(Property, { foreignKey: 'property_id' });

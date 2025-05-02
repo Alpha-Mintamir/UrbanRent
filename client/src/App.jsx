@@ -292,6 +292,15 @@ function App() {
                       </RoleGuard>
                     } 
                   />
+                  {/* Messages Routes for All User Types */}
+                  <Route 
+                    path="/messages" 
+                    element={
+                      <AuthGuard>
+                        <MessagesPage />
+                      </AuthGuard>
+                    } 
+                  />
                   <Route 
                     path="/tenant/messages" 
                     element={

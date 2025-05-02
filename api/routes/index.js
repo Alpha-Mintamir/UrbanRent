@@ -7,8 +7,11 @@ const placeRoutes = require('./place');
 const reviewRoutes = require('./reviewRoutes');
 const locationRoutes = require('./location');
 const messageRoutes = require('./messageRoutes');
+<<<<<<< HEAD
 const adminRoutes = require('./admin');
 const setupRoutes = require('./setup');
+=======
+>>>>>>> message-fix
 
 // User routes
 router.use('/user', userRoutes);
@@ -25,6 +28,7 @@ router.use('/locations', locationRoutes);
 // Message routes
 router.use('/messages', messageRoutes);
 
+<<<<<<< HEAD
 // Admin routes
 router.use('/admin', adminRoutes);
 
@@ -33,6 +37,8 @@ if (process.env.NODE_ENV !== 'production') {
   router.use('/setup', setupRoutes);
 }
 
+=======
+>>>>>>> message-fix
 // Debug routes - only available in non-production environments
 if (process.env.NODE_ENV !== 'production') {
   router.get('/debug/places', async (req, res) => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks';
 import { useLanguage } from '@/providers/LanguageProvider';
@@ -10,6 +10,7 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+<<<<<<< HEAD
   const [showMessageField, setShowMessageField] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -41,9 +42,47 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
   if (user.role !== 1 && user.role !== 4) {
     return null;
   }
+=======
+  const [shouldRender, setShouldRender] = useState(true);
 
-  // Don't show button if the user is trying to message themselves
-  if (user.user_id === ownerId) {
+  useEffect(() => {
+    console.log('MessageButton props:', { propertyId, ownerId, ownerName });
+    console.log('Current user:', user);
+>>>>>>> message-fix
+
+    // Check if we should render the button
+    if (!user) {
+      console.log('Not rendering MessageButton: User not logged in');
+      setShouldRender(false);
+      return;
+    }
+
+    // Check if user is a tenant (role 1)
+    if (user.role !== 'tenant' && user.role !== 1) {
+      console.log('Not rendering MessageButton: User is not a tenant', user.role);
+      setShouldRender(false);
+      return;
+    }
+
+    // Check if user is trying to message themselves
+    if (user.user_id === ownerId) {
+      console.log('Not rendering MessageButton: User is trying to message themselves');
+      setShouldRender(false);
+      return;
+    }
+
+    // Check if ownerId is valid
+    if (!ownerId) {
+      console.log('Not rendering MessageButton: Owner ID is missing');
+      setShouldRender(false);
+      return;
+    }
+
+    setShouldRender(true);
+  }, [user, ownerId, propertyId]);
+
+  // Don't render if conditions aren't met
+  if (!shouldRender) {
     return null;
   }
 
@@ -72,6 +111,7 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
     
     setIsLoading(true);
     try {
+<<<<<<< HEAD
       console.log('Sending message to:', { ownerId, propertyId });
       
       // Ensure propertyId is an integer
@@ -97,6 +137,37 @@ const MessageButton = ({ propertyId, ownerId, ownerName }) => {
       const errorMessage = error.response?.data?.message || 
                           (language === 'am' ? 'መልዕክት መላክ አልተቻለም' : 'Failed to send message');
       toast.error(errorMessage);
+=======
+      // First check if a conversation already exists
+      const conversationsResponse = await axiosInstance.get('/messages/conversations');
+      const existingConversation = conversationsResponse.data.find(
+        conv => conv.property_id === propertyId && 
+               (conv.other_user.user_id === ownerId || 
+                (conv.receiver_id === ownerId && conv.sender_id === user.user_id))
+      );
+
+      if (existingConversation) {
+        // If conversation exists, navigate to it
+        navigate('/tenant/messages', {
+          state: { conversationId: existingConversation.conversation_id }
+        });
+      } else {
+        // Start a new conversation
+        const response = await axiosInstance.post('/messages/start', {
+          receiver_id: ownerId,
+          property_id: propertyId,
+          content: t('initialMessage', { propertyOwner: ownerName }) || `Hi, I'm interested in your property.`
+        });
+
+        // Navigate to messages page with the new conversation selected
+        navigate('/tenant/messages', {
+          state: { conversationId: response.data.conversation_id }
+        });
+      }
+    } catch (error) {
+      console.error('Error with messaging:', error);
+      toast.error(t('errorStartingConversation') || 'Error starting conversation. Please try again.');
+>>>>>>> message-fix
     } finally {
       setIsLoading(false);
     }
