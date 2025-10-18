@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yegna Delivery - Feature Demo</title>
+    <link rel="stylesheet" href="styles-next-level.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .demo-section {
+            padding: 4rem 0;
+            text-align: center;
+        }
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .demo-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            backdrop-filter: blur(20px);
+            padding: 2rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .demo-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+        .demo-button {
+            margin: 1rem 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-section">
+        <div class="container">
+            <h1 class="hero-title">Yegna Delivery <span class="gradient-text">Next Level</span> Features</h1>
+            <p class="hero-subtitle">Experience all the cutting-edge features in action</p>
+            
+            <div class="demo-grid">
+                <div class="demo-card">
+                    <h3>🎨 Glassmorphism Effects</h3>
+                    <p>Beautiful frosted glass design throughout the website</p>
+                    <button class="btn-primary demo-button">Primary Button</button>
+                    <button class="btn-secondary demo-button">Secondary</button>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>✨ Animations</h3>
+                    <p>Smooth animations and transitions everywhere</p>
+                    <div class="service-icon" style="margin: 1rem auto;">
+                        <i class="fas fa-rocket"></i>
+                        <div class="icon-bg"></div>
+                    </div>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>🌈 Gradient Text</h3>
+                    <p>Dynamic <span class="gradient-text">gradient text</span> effects</p>
+                    <h2 class="gradient-text">Amazing Colors</h2>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>📊 Animated Counters</h3>
+                    <p>Numbers that count up when visible</p>
+                    <div class="stat-item" style="margin: 1rem auto; max-width: 150px;">
+                        <div class="stat-number">5K+</div>
+                        <div class="stat-label">Happy Users</div>
+                    </div>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>🔔 Notifications</h3>
+                    <p>Beautiful toast notifications</p>
+                    <button class="btn-primary demo-button" onclick="showNotification('Success! Order placed', 'success')">
+                        Show Success
+                    </button>
+                    <button class="btn-secondary demo-button" onclick="showNotification('Loading your order...', 'info')">
+                        Show Info
+                    </button>
+                </div>
+                
+                <div class="demo-card">
+                    <h3>🗺️ Interactive Map</h3>
+                    <p>Click to see the map modal</p>
+                    <button class="btn-primary demo-button" onclick="showLocationModal('Demo Location')">
+                        Open Map Modal
+                    </button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 4rem;">
+                <h2 class="section-title">Ready to Experience More?</h2>
+                <a href="index.html" class="btn-primary btn-large" style="display: inline-flex; margin-top: 2rem;">
+                    <i class="fas fa-home"></i>
+                    View Full Website
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script-next-level.js"></script>
+</body>
+</html>

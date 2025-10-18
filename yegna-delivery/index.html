@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yegna Delivery - Next Level Experience</title>
+    <link rel="stylesheet" href="styles-next-level.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+</head>
+<body>
+    <!-- Loader -->
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-brand">
+                <div class="logo">
+                    <img src="./logo.png" alt="Yegna Delivery" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="logo-fallback" style="display: none;">
+                        <div class="logo-icon-fallback"></div>
+                        <span class="logo-text-fallback">Yegna</span>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#coverage" class="nav-link">Coverage</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="btn-secondary">Track Order</button>
+                <button class="btn-primary">Order Now</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Fast & Reliable <span class="gradient-text">Delivery</span><br>
+                Anywhere in Hawassa
+            </h1>
+            <p class="hero-subtitle">
+                From groceries to packages, we deliver anything, anywhere in Hawassa with speed and care.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary btn-large">
+                    <i class="fas fa-shopping-cart"></i>
+                    Order Now
+                </button>
+                <button class="btn-outline btn-large">
+                    <i class="fas fa-phone"></i>
+                    Call Us
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section" id="coverage">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Our Delivery Coverage</h2>
+                <p class="section-subtitle">We deliver anywhere in Hawassa and surrounding areas</p>
+            </div>
+            
+            <div class="map-container">
+                <div class="map-wrapper">
+                    <div class="map" id="hawassa-map">
+                        <!-- Google Map will be rendered here -->
+                    </div>
+                    <div class="map-fallback" id="map-fallback">
+                        <div class="map-placeholder-content">
+                            <div class="map-title">Hawassa Delivery Coverage</div>
+                            <div class="map-subtitle">We deliver anywhere in Hawassa</div>
+                            <div class="delivery-points">
+                                <div class="delivery-point point-1" data-location="Hawassa City Center">
+                                    <div class="point-icon">
+                                        <i class="fas fa-city"></i>
+                                    </div>
+                                    <div class="point-pulse"></div>
+                                </div>
+                                <div class="delivery-point point-2" data-location="Lake Awassa Area">
+                                    <div class="point-icon">
+                                        <i class="fas fa-water"></i>
+                                    </div>
+                                    <div class="point-pulse"></div>
+                                </div>
+                                <div class="delivery-point point-3" data-location="University Area">
+                                    <div class="point-icon">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div class="point-pulse"></div>
+                                </div>
+                                <div class="delivery-point point-4" data-location="Industrial Zone">
+                                    <div class="point-icon">
+                                        <i class="fas fa-industry"></i>
+                                    </div>
+                                    <div class="point-pulse"></div>
+                                </div>
+                                <div class="delivery-point point-5" data-location="Residential Areas">
+                                    <div class="point-icon">
+                                        <i class="fas fa-home"></i>
+                                    </div>
+                                    <div class="point-pulse"></div>
+                                </div>
+                            </div>
+                            <div class="lake-awassa">
+                                <div class="lake-label">Lake Awassa</div>
+                            </div>
+                            <div class="coverage-area"></div>
+                        </div>
+                    </div>
+                    <div class="map-overlay">
+                        <div class="map-stats">
+                            <div class="stat-item">
+                                <div class="stat-number">5K+</div>
+                                <div class="stat-label">Downloads</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">15min</div>
+                                <div class="stat-label">Avg Delivery</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">99%</div>
+                                <div class="stat-label">Satisfaction</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cool Map Info Panel -->
+                <div class="map-info">
+                    <div class="info-card cool-card reveal-right">
+                        <div class="card-header">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <h3>Delivery Areas</h3>
+                        </div>
+                        <div class="delivery-areas">
+                            <div class="area-item">
+                                <div class="area-icon">
+                                    <i class="fas fa-city"></i>
+                                </div>
+                                <div class="area-info">
+                                    <span class="area-name">Hawassa City Center</span>
+                                    <span class="area-status">Active</span>
+                                </div>
+                            </div>
+                            <div class="area-item">
+                                <div class="area-icon">
+                                    <i class="fas fa-university"></i>
+                                </div>
+                                <div class="area-info">
+                                    <span class="area-name">University Area</span>
+                                    <span class="area-status">Active</span>
+                                </div>
+                            </div>
+                            <div class="area-item">
+                                <div class="area-icon">
+                                    <i class="fas fa-water"></i>
+                                </div>
+                                <div class="area-info">
+                                    <span class="area-name">Lake Awassa Region</span>
+                                    <span class="area-status">Active</span>
+                                </div>
+                            </div>
+                            <div class="area-item">
+                                <div class="area-icon">
+                                    <i class="fas fa-industry"></i>
+                                </div>
+                                <div class="area-info">
+                                    <span class="area-name">Industrial Zone</span>
+                                    <span class="area-status">Active</span>
+                                </div>
+                            </div>
+                            <div class="area-item">
+                                <div class="area-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="area-info">
+                                    <span class="area-name">All Residential Areas</span>
+                                    <span class="area-status">Active</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Our Delivery Services</h2>
+                <p class="section-subtitle">From food to books, we deliver everything you need in Hawassa</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card cool-service reveal-scale">
+                    <div class="service-card-inner">
+                        <div class="service-icon">
+                            <i class="fas fa-hamburger"></i>
+                            <div class="icon-bg"></div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Food Delivery</h3>
+                            <p>Yegna Delivery brings your favorite flavors to your doorstep. Enjoy a wide variety of cuisines from local restaurants, all delivered hot and fresh.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">Hot & Fresh</span>
+                                <span class="feature-tag">Wide Variety</span>
+                            </div>
+                            <div class="service-stats">
+                                <div class="stat">
+                                    <span class="stat-number">5K+</span>
+                                    <span class="stat-label">Downloads</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">15min</span>
+                                    <span class="stat-label">Avg Time</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="service-action">
+                            <a href="https://play.google.com/store/apps/details?id=com.yegnadelivery.yegna_delivery&hl=en-US" target="_blank" class="btn-service">
+                                <i class="fab fa-google-play"></i>
+                                Download App
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="service-card cool-service reveal-scale">
+                    <div class="service-card-inner">
+                        <div class="service-icon">
+                            <i class="fas fa-shopping-basket"></i>
+                            <div class="icon-bg"></div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Grocery Delivery</h3>
+                            <p>Say goodbye to crowded supermarkets! Yegna Delivery offers a convenient grocery delivery service. Shop for your groceries online and pay with your wallet.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">Fresh Produce</span>
+                                <span class="feature-tag">Convenient</span>
+                            </div>
+                            <div class="service-stats">
+                                <div class="stat">
+                                    <span class="stat-number">5K+</span>
+                                    <span class="stat-label">Downloads</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">30min</span>
+                                    <span class="stat-label">Avg Time</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="service-action">
+                            <a href="https://play.google.com/store/apps/details?id=com.yegnadelivery.yegna_delivery&hl=en-US" target="_blank" class="btn-service">
+                                <i class="fab fa-google-play"></i>
+                                Download App
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="service-card cool-service reveal-scale">
+                    <div class="service-card-inner">
+                        <div class="service-icon">
+                            <i class="fas fa-prescription-bottle-alt"></i>
+                            <div class="icon-bg"></div>
+                        </div>
+                        <div class="service-content">
+                            <h3>Pharmacy Delivery</h3>
+                            <p>Your health is our priority. Yegna Delivery makes it easy to access prescription medications and essential health supplies right to your door.</p>
+                            <div class="service-features">
+                                <span class="feature-tag">Health Priority</span>
+                                <span class="feature-tag">Prescriptions</span>
+                            </div>
+                            <div class="service-stats">
+                                <div class="stat">
+                                    <span class="stat-number">5K+</span>
+                                    <span class="stat-label">Downloads</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">20min</span>
+                                    <span class="stat-label">Avg Time</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="service-action">
+                            <a href="https://play.google.com/store/apps/details?id=com.yegnadelivery.yegna_delivery&hl=en-US" target="_blank" class="btn-service">
+                                <i class="fab fa-google-play"></i>
+                                Download App
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- App Screenshots Section -->
+    <section class="app-screenshots" id="app">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Download Our App</h2>
+                <p class="section-subtitle">Experience seamless delivery with our mobile application</p>
+            </div>
+            
+            <div class="screenshots-container">
+                <div class="screenshots-grid">
+                    <div class="screenshot-card reveal-scale">
+                        <div class="s26-frame">
+                            <div class="frame-screen">
+                                <img src="./s1.jpg" alt="Yegna Delivery App - Home Screen" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="screenshot-fallback" style="display: none;">
+                                    <div class="fallback-content">
+                                        <i class="fas fa-mobile-alt"></i>
+                                        <h4>Home Screen</h4>
+                                        <p>App Interface</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frame-bezel"></div>
+                        </div>
+                        <h4>Home Screen</h4>
+                        <p>Browse restaurants and food categories</p>
+                    </div>
+                    
+                    <div class="screenshot-card reveal-scale">
+                        <div class="s26-frame">
+                            <div class="frame-screen">
+                                <img src="./s2.jpg" alt="Yegna Delivery App - Special Offers" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="screenshot-fallback" style="display: none;">
+                                    <div class="fallback-content">
+                                        <i class="fas fa-percent"></i>
+                                        <h4>Special Offers</h4>
+                                        <p>Deals & Discounts</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frame-bezel"></div>
+                        </div>
+                        <h4>Special Offers</h4>
+                        <p>Discover amazing deals and discounts</p>
+                    </div>
+                    
+                    <div class="screenshot-card reveal-scale">
+                        <div class="s26-frame">
+                            <div class="frame-screen">
+                                <img src="./s3.jpg" alt="Yegna Delivery App - Checkout" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="screenshot-fallback" style="display: none;">
+                                    <div class="fallback-content">
+                                        <i class="fas fa-credit-card"></i>
+                                        <h4>Checkout</h4>
+                                        <p>Payment & Order</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frame-bezel"></div>
+                        </div>
+                        <h4>Checkout & Payment</h4>
+                        <p>Secure payment options and order confirmation</p>
+                    </div>
+                    
+                    <div class="screenshot-card reveal-scale">
+                        <div class="s26-frame">
+                            <div class="frame-screen">
+                                <img src="./s4.jpg" alt="Yegna Delivery App - New Restaurants" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="screenshot-fallback" style="display: none;">
+                                    <div class="fallback-content">
+                                        <i class="fas fa-store"></i>
+                                        <h4>New Places</h4>
+                                        <p>Discover Restaurants</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frame-bezel"></div>
+                        </div>
+                        <h4>Discover New Places</h4>
+                        <p>Find new restaurants and services</p>
+                    </div>
+                    
+                    <div class="screenshot-card reveal-scale">
+                        <div class="s26-frame">
+                            <div class="frame-screen">
+                                <img src="./s5.jpg" alt="Yegna Delivery App - Restaurant Menu" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="screenshot-fallback" style="display: none;">
+                                    <div class="fallback-content">
+                                        <i class="fas fa-utensils"></i>
+                                        <h4>Menu</h4>
+                                        <p>Restaurant Menu</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frame-bezel"></div>
+                        </div>
+                        <h4>Restaurant Menu</h4>
+                        <p>View detailed menus and place orders</p>
+                    </div>
+                    
+                    <div class="screenshot-card reveal-scale">
+                        <div class="s26-frame">
+                            <div class="frame-screen">
+                                <img src="./s6.jpg" alt="Yegna Delivery App - Refer & Earn" class="screenshot-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="screenshot-fallback" style="display: none;">
+                                    <div class="fallback-content">
+                                        <i class="fas fa-gift"></i>
+                                        <h4>Refer & Earn</h4>
+                                        <p>Earn Rewards</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="frame-bezel"></div>
+                        </div>
+                        <h4>Refer & Earn</h4>
+                        <p>Invite friends and earn rewards</p>
+                    </div>
+                </div>
+                
+                <div class="download-section reveal">
+                    <h3>Get the App Now</h3>
+                    <p>Download Yegna Delivery app for the best delivery experience in Hawassa</p>
+                    <div class="download-buttons">
+                        <a href="https://play.google.com/store/apps/details?id=com.yegnadelivery.yegna_delivery&hl=en-US" target="_blank" class="download-btn">
+                            <i class="fab fa-google-play"></i>
+                            <div>
+                                <span>Get it on</span>
+                                <strong>Google Play</strong>
+                            </div>
+                        </a>
+                        <div class="download-info">
+                            <p><strong>5K+ Downloads</strong></p>
+                            <p>Available on Android</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Working Hours Section -->
+    <section class="working-hours" id="hours">
+        <div class="container">
+            <div class="section-header reveal">
+                <h2 class="section-title">Working Hours</h2>
+                <p class="section-subtitle">We're always here to serve you</p>
+            </div>
+            
+            <div class="hours-content">
+                <div class="hours-card reveal-left">
+                    <div class="hours-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="hours-info">
+                        <h3>24/7 Service</h3>
+                        <p>We work Sunday to Sunday</p>
+                        <div class="hours-details">
+                            <div class="time-slot">
+                                <span class="day">Every Day</span>
+                                <span class="time">8:00 AM - 8:00 PM</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hours-features reveal-right">
+                    <div class="feature-item">
+                        <i class="fas fa-truck"></i>
+                        <span>Fast Delivery</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure Service</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-headset"></i>
+                        <span>24/7 Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content reveal">
+                <h2>Ready to Experience Fast Delivery?</h2>
+                <p>Join thousands of satisfied customers in Hawassa</p>
+                <div class="cta-actions">
+                    <button class="btn-primary btn-large">
+                        <i class="fas fa-phone"></i>
+                        Call +251 985 640 666
+                    </button>
+                    <button class="btn-outline btn-large">
+                        <i class="fab fa-whatsapp"></i>
+                        WhatsApp Us
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <img src="./logo.png" alt="Yegna Delivery" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="logo-fallback" style="display: none;">
+                            <div class="logo-icon-fallback"></div>
+                            <span class="logo-text-fallback">Yegna</span>
+                        </div>
+                    </div>
+                    <p>Fast, reliable delivery service for Hawassa and surrounding areas.</p>
+                </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Services</h4>
+                        <ul>
+                            <li><a href="#">Groceries</a></li>
+                            <li><a href="#">Packages</a></li>
+                            <li><a href="#">Food Delivery</a></li>
+                            <li><a href="#">Medicine</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Contact</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Privacy</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-column">
+                        <h4>Contact</h4>
+                        <ul>
+                            <li><i class="fas fa-phone"></i> +251 985 640 666</li>
+                            <li><i class="fas fa-envelope"></i> info@yegnadelivery.com</li>
+                            <li><i class="fas fa-globe"></i> www.yegnadelivery.com</li>
+                            <li><i class="fas fa-map-marker-alt"></i> Hawassa, Ethiopia</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Yegna Delivery. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script-next-level.js"></script>
+</body>
+</html>
