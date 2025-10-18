@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Yegna Delivery — Image Test</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;padding:20px;background:#0b1220;color:#e5e7eb}
+    .card{background:#101827;border:1px solid #1f2937;border-radius:12px;padding:16px;margin:10px 0}
+    .ok{color:#10B981;font-weight:700}
+    .bad{color:#ef4444;font-weight:700}
+    img{height:80px;border-radius:8px;box-shadow:0 10px 25px rgba(0,0,0,.25)}
+    .row{display:flex;align-items:center;gap:12px}
+    code{background:#0b1220;border:1px solid #1f2937;padding:2px 6px;border-radius:6px}
+  </style>
+</head>
+<body>
+  <h1>Image Availability Test</h1>
+  <p>Place images next to <code>index.html</code>. This page shows which ones exist.</p>
+  <div id="result"></div>
+
+  <script>
+    const files = ['logo.png','s1.jpg','s2.jpg','s3.jpg','s4.jpg','s5.jpg','s6.jpg'];
+    const result = document.getElementById('result');
+
+    function addRow(name, ok){
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <div class="row">
+          <img src="./${name}" onerror="this.style.display='none'" alt="${name}"/>
+          <div>
+            <div><strong>${name}</strong></div>
+            <div class="${ok?'ok':'bad'}">${ok?'✅ Found':'❌ Missing'}</div>
+            <div><code>./${name}</code></div>
+          </div>
+        </div>`;
+      result.appendChild(div);
+    }
+
+    // Probe with fetch (HEAD)
+    Promise.all(files.map(async f => {
+      try {
+        const res = await fetch('./'+f, { method: 'HEAD' });
+        addRow(f, res.ok);
+      } catch (e) {
+        addRow(f, false);
+      }
+    }));
+  </script>
+</body>
+</html>
