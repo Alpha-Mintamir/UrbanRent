@@ -1,0 +1,13 @@
+{
+  "name": "Yegna Delivery",
+  "short_name": "Yegna",
+  "description": "Fast, reliable delivery anywhere in Hawassa.",
+  "start_url": "/landing/yegna/index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    { "src": "/client/public/assets/logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/client/public/assets/logo.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
